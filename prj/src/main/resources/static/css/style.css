@@ -1,0 +1,180 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
+/* body 태그 안의 모든 글자 크기를 13px 로 설정하기 */
+body  {
+  padding: 0;
+  margin: 0;
+  font-size:16px;
+}
+body * {
+  font-family: 'Noto Sans KR', sans-serif;
+  box-sizing: border-box;
+}
+input {
+	outline: none;
+  accent-color: rgb(34, 30, 232);
+}
+.welcome_user {
+  cursor: pointer;
+  color: dimgray;
+}
+/* common popup css */
+.popup {
+	display: none;
+	position: absolute;
+	top: 0; left: 0;
+	width: 100%; height: 100%;
+	padding: 20px;
+	z-index: 999;
+}
+.freelancerRegForm > div {
+	border: 1px solid lightgray;
+}
+.flex {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0 0 10px;
+}
+.gender_box {
+	pointer-events: none;
+}
+.dim {
+  position: absolute;
+  top: 0; left: 0;
+	width: 100%; height: 100%;
+  background: rgb(0 , 0, 0, 0.7);
+}
+.popup_main {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+	width: 90%; height: 85%;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgb(0 , 0, 0, 0.5);
+  padding: 20px;
+  overflow: scroll;
+}
+.desc_box {
+  display: none;
+  font-size: 12px;
+}
+.search_bar_box input[type=text] {
+  width: 42.5%;
+}
+.search {
+  background: rgb(34, 30, 232);
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+}
+.search_bar_box > div {
+  border-top: 1px solid lightgrey;
+  margin: 20px 0 0;
+}
+.accent {
+  color: rgb(34, 30, 232);
+}
+.freeSearch, .search {
+  border: none;
+}
+.count_desc {
+  font-size: 12px;
+  color: dimgray;
+  display: flex;
+  align-items: center;
+}
+.pageNos {
+  font-size: 12px;
+}
+.isSelect {
+  color:rgb(34, 30, 232);
+  font-weight: bold;
+}
+.etc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.etc textarea {
+  width: 90%; height: 30px;
+}
+.filter {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-25%);
+  cursor: pointer;
+  color: dimgray;
+  transition: .25s;
+}
+.filter.active {
+  transform: translateY(-25%) rotate(180deg);
+}
+.filter:hover {
+  color:rgb(34, 30, 232);
+}
+.button_box {
+  position: relative;
+}
+.count_desc {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0 0 10px;
+}
+.dec_title,
+.desc_title {
+	font-weight: bold;
+}
+.desc_title {
+	width: 80px;
+}
+.dec_title {
+	width: 140px;
+}
+
+header {
+  font-size: 20px;
+  padding: 0 0 25px;
+  font-weight: bold;
+}
+header small {
+  font-weight: lighter;
+  font-size: 10px;
+  color: dimgray;
+}
+header > small small {
+  color: rgb(34, 30, 232);
+  font-weight: bold;
+}
+.welcome_name {
+  border: none !important;
+  cursor: pointer;
+}
+.desc_btn {
+  font-size: 12px !important;
+}
+.pageNos {
+  font-size: 12px;
+}
+.isSelect {
+  color: rgb(34, 30, 232);
+  font-weight: bold;
+}
+.searchPrjDetail, .searchDetail {
+  padding: 10px 0 !important;
+}
+.desc_btn {
+  border: none !important;
+}
+.hidden {
+  opacity: 0;
+}
+.gray_btn {
+  border: none;
+  background: #fff;
+  color: dimgray;
+  cursor: pointer;
+}

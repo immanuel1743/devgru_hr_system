@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--***************************************************-->
+<!-- mapper 태그 선언하기 -->
+<!-- mapper 태그 안의 namespace 값은 [원하는 인터페이스 저장 패키지 경로]하고 일치해야한다. -->
+<!--***************************************************-->
+<mapper namespace="com.naver.erp.PrjDAO">
+
+<sql id="prjWhere">
+	<if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)"> and ( </if>
+	<if test="keyword1!=null and keyword1.length()>0">
+	<!--  프로젝트명, 년차, 자격증 만 검색에 포함  -->
+		( upper(prj_name) like upper('%${keyword1}%') or REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%')) or REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_OPER_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%')) or REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%')) or REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_PUBL_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%')) or REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(DECODE(license, '정보처리기사', '정보처리산업기사'), ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_DEV_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_DEV_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , upper('%${keyword1}%')) or REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(DECODE(license, '정보처리기사', '정보처리산업기사'), ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_OPER_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_OPER_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , upper('%${keyword1}%')) or REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(DECODE(license, '정보처리기사', '정보처리산업기사'), ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_DESI_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_DESI_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , upper('%${keyword1}%')) or REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(DECODE(license, '정보처리기사', '정보처리산업기사'), ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_PUBL_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_PUBL_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , upper('%${keyword1}%')) )
+	</if>
+	<if test="(keyword1!=null and keyword1.length()>0) and (keyword2!=null and keyword2.length()>0)"> ${orand} </if>
+	<if test="keyword2!=null and keyword2.length()>0"> ( upper(prj_name) like upper('%${keyword2}%') or REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword2}%')) or REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_OPER_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword2}%')) or REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword2}%')) or REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_PUBL_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword2}%')) or REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(license, ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_DEV_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_DEV_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , upper('%${keyword2}%')) or REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(license, ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_OPER_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_OPER_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , upper('%${keyword2}%')) or REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(license, ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_DESI_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_DESI_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , upper('%${keyword2}%')) or REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(license, ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_PUBL_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_PUBL_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , upper('%${keyword2}%')) ) </if>
+	<if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)"> ) </if>
+</sql>
+
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!--  프로젝트 입력하는 insert 문을 내포한 insert 태그 선언  -->
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<insert id="insertPrjInfo" parameterType="com.naver.erp.PrjDTO">
+	insert into prj( prj_num
+	<!--  프로젝트 UID  -->
+	,reg_date
+	<!--  접수일자  -->
+	,min_period
+	<!--  최소 기간  -->
+	<if test="max_period!=null and max_period.length()>0">
+		,max_period
+		<!--  최대 기간  -->
+	</if>
+	,prj_name
+	<!--  프로젝트명  -->
+	,client_company
+	<!--  고객사  -->
+	,work_content
+	<!--  업무 내용  -->
+	,work_place
+	<!--  업무 장소  -->
+	,go_work_time
+	<!--  출근시간  -->
+	,cooperator_name
+	<!--  협력업체  -->
+	<if test="prj_etc!=null and prj_etc.length()>0">
+		,#{prj_etc}
+		<!--  기타내용  -->
+	</if>
+	) values ( ,#{prj_num} ,#{reg_date} ,to_date(#{min_period}, 'yyyy-mm-dd')
+	<if test="max_period!=null and max_period.length()>0"> ,to_date(#{max_prj_period}, 'yyyy-mm-dd') </if>
+		,#{prj_name} ,#{client_company} ,#{work_content} ,#{work_space} ,CONCAT(#{go_work_hours}, #{go_work_minute}) ,#{coperator_name}
+	<if test="prj_etc!=null and prj_etc.length()>0"> ,#{prj_etc} </if>
+	)
+</insert>
+<!--  개발 인력  -->
+<insert id="prj_dev_person_info" parameterType="com.naver.erp.PrjDTO"> insert into prj_dev_person_info ( prj_num ,worked_year ,person_num ) values ( #{prj_num} ,#{year_dev} ,#{person_num_dev} ) </insert>
+<!--  개발 인력 자격증  -->
+<insert id="prj_dev_license_info" parameterType="com.naver.erp.PrjDTO">
+	INSERT INTO prj_dev_license_info ( prj_num ,license_code )
+	<foreach item="tmp" collection="prj_dev_license" separator=" UNION ALL "> SELECT #{prj_num}, {tmp} FROM DUAL </foreach>
+</insert>
+<!--  운영 인력  -->
+<insert id="prj_oper_person_info" parameterType="com.naver.erp.PrjDTO"> insert into prj_oper_person_info ( prj_num ,worked_year ,person_num ) values ( #{prj_num} ,#{year_ope} ,#{person_num_ope} ) </insert>
+<!--  운영 인력 자격증  -->
+<insert id="prj_oper_license_info" parameterType="com.naver.erp.PrjDTO">
+	INSERT INTO prj_oper_license_info ( prj_num ,license_code )
+	<foreach item="tmp" collection="prj_oper_license" separator=" UNION ALL "> SELECT #{prj_num}, {tmp} FROM DUAL </foreach>
+</insert>
+<!--  퍼블리셔 인력  -->
+<insert id="prj_publ_person_info" parameterType="com.naver.erp.PrjDTO"> insert into prj_publ_person_info ( prj_num ,worked_year ,person_num ) values ( #{prj_num} ,#{year_perb} ,#{person_num_perb} ) </insert>
+<!--  퍼블리셔 인력 자격증  -->
+<insert id="prj_publ_license_info" parameterType="com.naver.erp.PrjDTO">
+	INSERT INTO prj_publ_license_info ( prj_num ,license_code )
+	<foreach item="tmp" collection="prj_publ_license" separator=" UNION ALL "> SELECT #{prj_num}, {tmp} FROM DUAL </foreach>
+</insert>
+<!--  디자이너 인력  -->
+<insert id="prj_desi_person_info" parameterType="com.naver.erp.PrjDTO"> insert into prj_desi_person_info ( prj_num ,worked_year ,person_num ) values ( #{prj_num} ,#{year_desi} ,#{person_num_desi} ) </insert>
+<!--  디자이너 인력 자격증  -->
+<insert id="prj_desi_license_info" parameterType="com.naver.erp.PrjDTO">
+	INSERT INTO prj_desi_license_info ( prj_num ,license_code )
+	<foreach item="tmp" collection="prj_desi_license" separator=" UNION ALL "> SELECT #{prj_num}, {tmp} FROM DUAL </foreach>
+</insert>
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!--  프로젝트 정보 검색 모든 행의 개수 구하는 select 문을 내포한 select 태그 선언  -->
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<select id="selectPrjinfoCntAll" resultType="int"> select count(*) from prj </select>
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!--  프로젝트 정보 검색된 행의 개수 구하는 select 문을 내포한 select 태그 선언  -->
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<select id="selectPrjinfoCnt" parameterType="com.naver.erp.PrjSearchDTO" resultType="int">
+select count(*) from prj where 1=1
+<include refid="prjWhere"/>
+</select>
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!--  프로젝트 정보 검색하는 select 문을 내포한 select 태그 선언  -->
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<select id="selectPrjinfo" parameterType="com.naver.erp.PrjSearchDTO" resultType="java.util.HashMap">
+select * from (select rownum RNUM, zxcvb.* from ( prj_name 프로젝트명, TO_CHAR(reg_date, 'yyyy"년 "mm"월 "dd"일 "') 접수일, TO_CHAR(MIN_PERIOD, 'yyyy"년 "mm"월 "dd"일 "') 시작일, NVL(TO_CHAR(MAX_PERIOD, 'yyyy"년 "mm"월 "dd"일 "'), '미정') 종료일, NVL((MAX_PERIOD - Min_PERIOD)/30||'개월', '미정') "기간(개월)", (SELECT PERSON_NUM FROM PRJ_DEV_PERSON_INFO PDPI WHERE P.PRJ_NUM=PDPI.PRJ_NUM)||' 명' "개발 인원", (SELECT PERSON_NUM FROM PRJ_OPER_PERSON_INFO POPI WHERE P.PRJ_NUM=POPI.PRJ_NUM)||' 명' "운영 인원", (SELECT PERSON_NUM FROM PRJ_DESI_PERSON_INFO PDPI WHERE P.PRJ_NUM=PDPI.PRJ_NUM)||' 명' "디자이너 인원", (SELECT PERSON_NUM FROM PRJ_PUBL_PERSON_INFO PPPI WHERE P.PRJ_NUM=PPPI.PRJ_NUM)||' 명' "퍼블리셔 인원" from prj p where 1=1 AND
+<!--  파견 시작일   -->
+P.MIN_PERIOD BETWEEN TO_DATE('2023-10-18', 'yyyy-mm-dd') AND TO_DATE('2023-11-01', 'yyyy-mm-dd') AND
+<!--  파견 종료일   -->
+P.MAX_PERIOD BETWEEN TO_DATE('2023-12-01', 'yyyy-mm-dd') AND TO_DATE('2023-12-20', 'yyyy-mm-dd') AND
+<!--  파견 기간   -->
+(P.MAX_PERIOD - P.Min_PERIOD)/30 BETWEEN 1 AND 2 AND
+<!--  개발 년차  -->
+(SELECT worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) BETWEEN 5 AND 10 AND
+<!--  운영 년차  -->
+(SELECT worked_year FROM PRJ_OPER_PERSON_INFO POPI WHERE p.PRJ_NUM=POPI.PRJ_NUM) BETWEEN 1 AND 4 AND
+<!--  디자이너 년차  -->
+(SELECT worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) BETWEEN 1 AND 3 AND
+<!--  퍼블리셔 년차  -->
+(SELECT worked_year FROM PRJ_PUBL_PERSON_INFO PPLI WHERE p.PRJ_NUM=PPLI.PRJ_NUM) BETWEEN 1 AND 3 AND
+<!--  개발 자격증  -->
+REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(license, ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_DEV_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_DEV_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , '2') AND
+<!--  운영 자격증  -->
+REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(license, ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_OPER_LICENSE_INFO POLI UNION SELECT prj_num, license_code FROM PRJ_OPER_LICENSE_INFO POLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , '1') AND
+<!--  디자이너 자격증  -->
+REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(license, ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_DESI_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_DESI_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , '1|2') AND
+<!--  퍼블리셔 자격증  -->
+REGEXP_LIKE( ( SELECT FLC.license FROM (SELECT pno, LISTAGG(license, ', ') WITHIN GROUP(ORDER BY license) license FROM ( SELECT prj_num pno, license_code as license FROM PRJ_PUBL_LICENSE_INFO PDLI UNION SELECT prj_num, license_code FROM PRJ_PUBL_LICENSE_INFO PDLI ) x GROUP BY pno ) FLC WHERE p.prj_num = FLC.pno ) , '1|2')
+<include refid="prjWhere"/>
+<![CDATA[ ) zxcvb) where RNUM >= #{begin_rowNo} and RNUM <= #{end_rowNo} ]]>
+</select>
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!--  프로젝트 정보 수정하는 update 문을 내포한 update 태그 선언  -->
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<update id="updatePrjInfo" parameterType="com.naver.erp.PrjDTO">
+update prj set prj_num=#{prj_num}
+<!--  프로젝트 고유 번호  -->
+,reg_date=#{reg_date}
+<!--  접수일자  -->
+,min_period=#{min_period}
+<!--  최소 기간  -->
+<if test="max_period!=null and max_period.length()>0">
+,max_period=#{max_period}
+<!--  최대 기간  -->
+</if>
+,prj_name=#{prj_name}
+<!--  프로젝트명  -->
+,client_company=#{client_company}
+<!--  고객사  -->
+,work_content=#{work_content}
+<!--  업무 내용  -->
+,work_place=#{work_place}
+<!--  업무 장소  -->
+,go_work_time=#{go_work_time}
+<!--  출근시간  -->
+,cooperator_name=#{cooperator_name}
+<!--  협력업체  -->
+<if test="prj_etc!=null and prj_etc.length()>0">
+,prj_etc=#{prj_etc}
+<!--  기타내용  -->
+</if>
+where prj_num=#{prj_num}
+</update>
+<!--  개발 인력  -->
+<update id="update_prj_dev_person_info" parameterType="com.naver.erp.PrjDTO"> update prj_dev_person_info set worked_year=#{year_dev} ,person_num=#{person_num_dev} where prj_num=#{prj_num} </update>
+<!--  운영 인력  -->
+<update id="update_prj_oper_person_info" parameterType="com.naver.erp.PrjDTO"> update prj_oper_person_info set worked_year=#{year_dev} ,person_num=#{person_num_dev} where prj_num=#{prj_num} </update>
+<!--  퍼블리셔 인력  -->
+<update id="update_prj_publ_person_info" parameterType="com.naver.erp.PrjDTO"> update prj_publ_person_info set worked_year=#{year_dev} ,person_num=#{person_num_dev} where prj_num=#{prj_num} </update>
+<!--  디자이너 인력  -->
+<update id="update_prj_desi_person_info" parameterType="com.naver.erp.PrjDTO"> update prj_desi_person_info set worked_year=#{year_dev} ,person_num=#{person_num_dev} where prj_num=#{prj_num} </update>
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!--  프로젝트 정보 삭제하는 delete 문을 내포한 delete 태그 선언  -->
+<!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<delete id="deletePrjInfo" parameterType="com.naver.erp.PrjDTO"> delete from prj where prj_num=#{prj_num} </delete>
+<!--  개발 인력  -->
+<delete id="update_prj_dev_person_info" parameterType="com.naver.erp.PrjDTO"> delete from prj_dev_person_info where prj_num=#{prj_num} </delete>
+<!--  운영 인력  -->
+<delete id="update_prj_oper_person_info" parameterType="com.naver.erp.PrjDTO"> delete from prj_oper_person_info where prj_num=#{prj_num} </delete>
+<!--  퍼블리셔 인력  -->
+<delete id="update_prj_publ_person_info" parameterType="com.naver.erp.PrjDTO"> delete from prj_publ_person_info where prj_num=#{prj_num} </delete>
+<!--  디자이너 인력  -->
+<delete id="update_prj_desi_person_info" parameterType="com.naver.erp.PrjDTO"> delete from prj_desi_person_info where prj_num=#{prj_num} </delete>
+<!--  개발 인력 자격증  -->
+<delete id="delete_prj_dev_license_info" parameterType="com.naver.erp.PrjDTO"> delete from prj_dev_license_info where prj_num=#{prj_num} </delete>
+<!--  운영 인력 자격증  -->
+<delete id="delete_prj_oper_license_info" parameterType="com.naver.erp.PrjDTO"> delete from prj_oper_license_info where prj_num=#{prj_num} </delete>
+<!--  퍼블리셔 인력 자격증  -->
+<delete id="delete_prj_publ_license_info" parameterType="com.naver.erp.PrjDTO"> delete from prj_publ_license_info where prj_num=#{prj_num} </delete>
+<!--  디자이너 인력 자격증  -->
+<delete id="delete_prj_desi_license_info" parameterType="com.naver.erp.PrjDTO"> delete from prj_desi_license_info where prj_num=#{prj_num} </delete>
+</mapper>

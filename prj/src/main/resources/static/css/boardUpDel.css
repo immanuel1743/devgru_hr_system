@@ -1,0 +1,311 @@
+select,
+input,
+textarea {
+	outline: none;
+  resize: none;
+}
+body {
+  padding: 0; margin: 0;
+  font-size: 12px;
+  height: 100vh;
+}
+* {
+  box-sizing: border-box;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* ----------- */
+.dev_user input {
+  margin: 0 10px 0 0;
+}
+header {
+  font-size: 20px;
+  margin: 10px 5px 20px;
+  border-bottom: 1px solid #0000CD;
+  padding: 0 0 10px;
+}
+select,
+textarea,
+input {
+  transition: .25s;
+  font-size: 12px;
+  border-radius: 3px;
+  font-size: 12px;
+  border: 1px solid lightgrey;
+  padding: 5px 10px;
+}
+select:focus,
+textarea:focus,
+input:focus {
+  border: 1px solid #0000CD;
+}
+textarea {
+  width: 100%;
+}
+body {
+  display: flex;
+  width: 100%;
+}
+body > form {
+  padding: 15px;
+}
+body > form:first-child {
+  z-index: 1;
+  width: 15%;
+  box-shadow: 0 0 10px rgb(0 , 0, 0, 0.09);
+}
+body > form:last-of-type {
+  width: 85%;
+}
+.boardForm {
+  background: rgba(223, 223, 255, 0.3);
+  overflow: scroll;
+}
+.boardForm > div {
+  border-radius: 5px;
+  margin: 0 0 10px;
+  background: #fff;
+  padding: 15px;
+  border-bottom: 1px solid lightgrey;
+}
+.boardForm > div:first-child {
+  padding: 0 0 20px;
+}
+.header_box {
+  height: 100%;
+  position: relative;
+}
+.cate_box {
+  display: flex;
+  flex-direction: column;
+  margin: 30px 0 0;
+  gap: 15px;
+  color: dimgray;
+  font-size: 12px;
+}
+.main_cate {
+  transition: .25s;
+  cursor: pointer;
+}
+.main_cate:hover,
+.main_cate.active {
+  color: #0000CD;
+  font-weight: bold;
+}
+.logo {
+  width: fit-content;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  margin: 0 0 0 3px;
+  
+  font-weight: bold;
+}
+.welcome_user {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  transform: translateY(-50%);
+}
+.welcome_user > div:first-child {
+  border-right: 1px solid lightgray;
+  font-size: 12px;
+  padding: 0 8px 0 0;
+}
+.welcome_name {
+  display: inline-block;
+  border-bottom: 1px solid rgb(34, 30, 232, .5);
+}
+.logout_btn {
+  margin: 0 0 0 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  color: dimgray;
+}
+.today_btn,
+.cancel,
+.save {
+  display: inline-block;
+  border-radius: 5px;
+  width: 100px; height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-weight: 400;
+  margin: 10px 0 0;
+  font-size: 14px;
+  padding: 0 10px;
+  transition: .25s;
+  color: #0000CD;
+  background: #fff;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.save {
+  background-color: #0000CD;
+  color: #fff;
+}
+.cancel {
+  border: 1px solid lightgrey;
+}
+.save:hover {
+  box-shadow: 0 0 10px rgba(18, 18, 32, 0.20);
+}
+.title {
+  font-weight: bold;
+  font-size: 12px;
+  margin: 0 0 10px;
+  border-bottom: 1px solid lightgray;
+  padding: 0 0 12px;
+}
+.boardForm > div > div:not(.title, :last-child) {
+  margin: 0 0 10px;
+}
+.compan,
+.compan_desc,
+.school_desc,
+.school  {
+  display: flex;
+  align-items: center;
+}
+.center > div, 
+.compan > div,
+.fam > div ,
+.school > div {
+  text-align: center;
+  padding: 0 0 8px;
+  border-bottom: 1px solid rgba(18, 18, 32, 0.20);
+}
+.compan > div,
+.fam > div ,
+.school_desc > div {
+  padding: 0 0 8px;
+}
+.center_desc,
+.center,
+.school_desc > div:not(:first-child) {
+  text-align: center;
+}
+.school_desc > div input {
+  margin: 0 0 10px;
+}
+.school_desc > div:first-child input {
+  margin: 0 10px 10px;
+}
+.school_desc > div:first-child,
+.school > div:first-child {
+  width: 30%;
+}
+.school_desc > div:nth-child(2),
+.school > div:nth-child(2) {
+  width: 20%;
+}
+.school_desc > div:nth-child(3),
+.school > div:nth-child(3) {
+  width: 20%;
+}
+.school_desc > div:last-child,
+.school > div:last-child {
+  width: 30%;
+}
+.fam {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fam > div  {
+  width: 20%;
+  border-bottom: 1px solid rgba(18, 18, 32, 0.20);
+}
+.fam_desc > div {
+  width: 20%;
+  text-align: center;
+}
+.compan_desc > div input
+.fam_desc > div input {
+  margin: 0 0 10px;
+}
+.center_desc,
+.center,
+.compan_desc,
+.fam_desc {
+  display: flex;
+}
+.fam_desc select {
+  width: 80%;
+}
+.btn {
+  background-color: #fff;
+  border: 1px solid rgba(18, 18, 32, 0.20);
+  border-radius: 5px;
+  color:#0000CD;
+  cursor: pointer;
+}
+.license_notice {
+  padding: 15px 0 0;
+  margin: 10px 0 !important;
+  border-top: 1px solid lightgray;
+}
+.center > div,
+.compan > div {
+  border-bottom: 1px solid rgba(18, 18, 32, 0.20);
+}
+.center_desc > div,
+.center > div,
+.compan > div,
+.compan_desc > div {
+  flex: 1;
+}
+.compan_desc {
+  text-align: center;
+}
+.compan_name input:first-child {
+  margin: 0 0 5px;
+}
+.dept_1 {
+  display: flex;
+  align-items: center;
+}
+.dept_1:not(:last-child) {
+  margin: 0 0 5px;
+}
+.dept_1 div:first-child {
+  width: 80px;
+}
+.curr {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.cur {
+  display: flex;
+  margin: 0 0 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(18, 18, 32, 0.20);
+  padding:  0 0 8px;
+}
+.cur > div:not(:last-child),
+.curr > div:not(:last-child) {
+  flex: 1;
+}
+.curr > div:last-child,
+.cur > div:last-child {
+  width: 15%;
+}
+.noti {
+  font-size: 10px;
+  color: dimgray;
+  margin: 3px 0 0;
+}
+.cur_desc {
+  display: flex;
+  align-items: center;
+}
+.cur_desc > div {
+  width: 60px;
+}

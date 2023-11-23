@@ -1,0 +1,469 @@
+select,
+input,
+textarea {
+	outline: none;
+  resize: none;
+}
+body {
+  padding: 0; margin: 0;
+  font-size: 12px;
+  height: 100vh;
+}
+* {
+  box-sizing: border-box;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* ----------- */
+.isRetire {
+  border: 1px solid #0000CD;
+  border-right: 1px solid #0000CD !important;
+  border-radius: 3px;
+}
+header {
+  font-size: 20px;
+}
+select,
+textarea,
+input {
+  transition: .25s;
+  font-size: 12px;
+  border-radius: 3px;
+  font-size: 12px;
+  border: 1px solid lightgrey;
+  padding: 5px 10px;
+}
+body > .none{
+	width:0%
+}
+select:focus,
+textarea:focus,
+input:focus {
+  border: 1px solid #0000CD;
+}
+body {
+  display: flex;
+  width: 100%;
+}
+body > form {
+  padding: 15px;
+}
+body > form:first-child {
+  z-index: 1;
+  width: 15% !important;
+  box-shadow: 0 0 10px rgb(0 , 0, 0, 0.09);
+}
+body > div {
+  width: 85%;
+  overflow: scroll;
+}
+body > div > form {
+  padding: 25px;
+}
+body > div > div {
+  background: #fff;
+}
+.boardForm > div {
+  border-radius: 5px;
+  margin: 0 0 10px;
+  background: #fff;
+  padding: 15px;
+  border-bottom: 1px solid lightgrey;
+}
+.boardForm > div:first-child {
+  padding: 0 0 20px;
+}
+.header_box {
+  height: 100%;
+  position: relative;
+}
+.cate_box {
+  display: flex;
+  flex-direction: column;
+  margin: 30px 0 0;
+  gap: 15px;
+  color: dimgray;
+  font-size: 12px;
+}
+.main_cate {
+  transition: .25s;
+  cursor: pointer;
+}
+.main_cate:hover,
+.main_cate.active {
+  color: #0000CD;
+  font-weight: bold;
+}
+.logo {
+  width: fit-content;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  margin: 0 0 0 3px;
+  
+  font-weight: bold;
+}
+.welcome_user {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  transform: translateY(-50%);
+}
+.welcome_user > div:first-child {
+  border-right: 1px solid lightgray;
+  font-size: 12px;
+  padding: 0 8px 0 0;
+}
+.welcome_name {
+  display: inline-block;
+  cursor: pointer;
+}
+.logout_btn {
+  margin: 0 0 0 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  color: dimgray;
+}
+.delete,
+.cancel,
+.save {
+  display: inline-block;
+  border-radius: 5px;
+  width: 100px; height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-weight: 400;
+  margin: 10px 0 0;
+  font-size: 14px;
+  padding: 0 10px;
+  transition: .25s;
+  color: #0000CD;
+  background: #fff;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.save {
+  background-color: #0000CD;
+  color: #fff;
+}
+.delete,
+.cancel {
+  border: 1px solid lightgrey;
+}
+.save:hover {
+  box-shadow: 0 0 10px rgba(18, 18, 32, 0.20);
+}
+.title {
+  font-weight: bold;
+  font-size: 12px;
+  margin: 0 0 10px;
+  border-bottom: 1px solid lightgray;
+  padding: 0 0 12px;
+}
+.boardForm > div > div:not(.title, :last-child) {
+  margin: 0 0 10px;
+}
+input[type='button']:not(.freeSearch, .search) {
+  border: none;
+  background: initial;
+  color: dimgrey;
+  cursor: pointer;
+}
+.title {
+  font-weight: bold;
+  font-size: 12px;
+  margin: 0 0 10px;
+  border-bottom: 1px solid lightgray;
+  padding: 0 0 12px;
+}
+.desc_btn {
+  border: 1px solid lightgray;
+  background: #fff;
+  width: fit-content; height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-weight: 400;
+  margin: 10px 0 0;
+  font-size: 12px;
+  padding: 0 10px;
+  transition: .25s;
+  margin-right: 10px;
+  cursor: pointer;
+  color: #0000CD;
+  border-radius: 5px;
+}
+.desc_btn.freeSearch {
+  color: #fff;
+  background: #0000CD;
+  border: 1px solid initial
+}
+.desc_btn.freeSearch:hover {
+  box-shadow: 0 0 10px rgba(18, 18, 32, 0.20);
+}
+.resultCate {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid lightgray;
+  border: 1px solid #0000CD;
+  box-shadow: 0 6px 10px -2px rgb(34, 30, 232, .25);
+}
+.searchDetail,
+.resultCate > div {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.resultCate > div,
+.searchDetail > div,
+.resultCate > div {
+  width: 6.6666%;
+}
+.resultCate > div {
+  padding: 10px 5px;
+  justify-content: center;
+}
+.resultCate > div:first-child {
+  border-left: 7px solid #0000CD;
+}
+.searchResult_box {
+  background: rgba(223, 223, 255, 0.3);
+}
+.searchDetail {
+  justify-content: space-between;
+  padding: 20px 0;
+  border: 1px solid #ffffff00;
+  transition: .15s;
+}
+.searchDetail > div {
+  border-right: 1px solid lightgray;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 30px;
+}
+.searchDetail:hover {
+  border: 1px solid #0000CD;
+
+}
+.searchDetail > div:last-child {
+  border-right: unset;
+}
+.searchDetail:nth-child(even) {
+  background: #fff;
+}
+.pageNos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0;
+  margin: 10px 0 0;
+}
+.pageNos span:not(.isClick) {
+  cursor: pointer;
+}
+.isClick,
+.unClick {
+  display: inline-block;
+  width: 20px; height: 20px;
+  text-align: center;
+  line-height: 22px;
+  border-radius: 3px;
+}
+.isClick {
+  background: #0000CD;
+  color: #fff;
+}
+.unClick {
+  transition: .25s;
+}
+.unClick:hover {
+  font-weight: bold;
+  color: #0000CD;
+}
+section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.cntSearch {
+  border-right: 1px solid #0000CD;
+  padding: 0 10px 0 0;
+}
+.rownum {
+  margin: 0 0 0 10px;
+}
+
+/* common popup css */
+.popup {
+	display: none;
+	position: absolute;
+	top: 0; left: 0;
+	width: 100%; height: 100%;
+	padding: 20px;
+	z-index: 999;
+}
+.freelancerRegForm > div {
+	border: 1px solid lightgray;
+}
+.desc_title {
+	font-weight: bold;
+	width: 80px;
+}
+.flex {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0 0 10px;
+}
+.gender_box {
+	pointer-events: none;
+}
+.dim {
+  position: absolute;
+  top: 0; left: 0;
+	width: 100%; height: 100%;
+  background: rgb(0 , 0, 0, 0.7);
+}
+.popup_main {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+	width: 90%; height: 85%;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgb(0 , 0, 0, 0.5);
+  padding: 20px;
+  overflow: scroll;
+}
+.showDevInfo {
+  cursor: pointer;
+}
+header {
+  font-size: 20px;
+  padding: 0 0 25px;
+  font-weight: bold;
+}
+header small {
+  font-weight: lighter;
+  font-size: 10px;
+  color: dimgray;
+}
+header > small small {
+  color:#0000CD;
+  font-weight: bold;
+}
+input[name=transfer] {
+  margin: 0 !important;
+}
+.desc_option {
+  border-radius: 3px;
+  width: 160px !important;
+  height: 30px;
+  text-align: left;
+  line-height: 27px;
+}
+.desc_option > div:first-child {
+  padding: 0 5px;
+  color: dimgray;
+  font-weight: normal;
+  cursor: pointer;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+}
+.cur_desc {
+  align-items: baseline;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cur_desc {
+  padding: 5px 0;
+}
+.cur_desc > div {
+  width: 50px;
+}
+.scroll_box {
+  display: none;
+  border-bottom: 1px solid lightgray;
+  border-right: 1px solid lightgray;
+  border-left: 1px solid lightgray;
+  flex-direction: column;
+  width: 160px;
+  height: 80px;
+  align-items: flex-start;
+  overflow-y: scroll;
+  background: #fff;
+  position: relative;
+}
+.curr_div > .cur > div:first-child,
+.curr > div:first-child {
+  width: 35%;
+}
+.curr_div > .cur > div:nth-child(2),
+.curr > div:nth-child(2)  {
+  width: 35%;
+}
+.curr_div > .cur > div:last-child,
+.curr > div:last-child  {
+  width: 30%;
+}
+.desc_option > div:first-child.active {
+  border: 1px solid #0000CD;
+}
+.button_box {
+  border-top: 1px solid lightgrey;
+  margin: 20px 0 0;
+  position: relative;
+}
+.isSelect {
+  color:#0000CD;
+}
+body > form:last-of-type {
+  position: static !important;
+}
+.boardForm {
+  width: 100%;
+}
+.isEmpty {
+  text-align: center;
+  margin: 240px 0;
+  font-size: 14px;
+  color: dimgray;
+  background: #fff;
+}
+.isEmpty i {
+  display: block;
+  font-size: 30px;
+  margin: 0 0 20px;
+}
+.devRegForm > div {
+  margin: 15px 0;
+}
+.add_fam {
+  border: 1px solid rgb(34, 30, 232, 0.6);
+  color: rgb(34, 30, 232, 0.6) !important;
+  border-radius: 3px;
+}
+.emm_btn {
+  border: 1px solid lightgray;
+  color: dimgray;
+  font-size: 10px;
+  padding: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin: 0 0 0 10px;
+}
+.cur {
+  justify-content: space-around;
+}

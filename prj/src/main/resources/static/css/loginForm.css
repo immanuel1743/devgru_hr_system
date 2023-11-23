@@ -1,0 +1,88 @@
+input {
+	outline: none;
+}
+body {
+  padding: 0; margin: 0;
+  font-size: 12px;
+  height: 100vh;
+}
+* {
+  box-sizing: border-box;
+}
+.mid, .pwd {
+  transition: .25s;
+}
+.pwd:focus,
+.mid:focus {
+  border: 1px solid #0000CD;
+}
+table {
+  border-spacing: 0;
+}
+.main {
+  position: absolute;
+  top: 40%; left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgb(34, 30, 232, .3);
+  padding: 30px;
+  border-radius: 2px;
+}
+.title {
+  line-height: 20pxs;
+  font-size: 18px;
+  color: dimgray;
+  margin: 0 0 15px;
+  padding: 0 5px;
+}
+input:not(.autoLogin) {
+  font-size: 12px;
+  border-radius: 50px;
+}
+input[type=text],
+input[type=password] {
+  font-size: 16px;
+  border-radius: 50px;
+  border: 1px solid lightgrey;
+  width: 200px;
+  padding: 5px 10px;
+  font-weight: normal;
+}
+input[type=text] {
+  margin: 0 0 5px;
+}
+.auto_box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 10px 0 0;
+}
+.autoTxt {
+  color: dimgray;
+  font-size: 14px;
+}
+.button_box > input {
+  width: 100%; height: 35px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-weight: 400;
+  margin: 10px 0 0;
+  padding: 0 10px;
+  cursor: pointer;
+  transition: .25s;
+}
+.button_box > input:first-child {
+  background-color: #0000CD;
+  color: #fff;
+  margin-right: 10px;
+}
+.button_box > input:last-child {
+  border: 1px solid #0000CD;
+  color: #fff;
+  background: #0000CD;
+}
+.button_box > input:hover {
+  background-color: #0000CD;
+  box-shadow: 0 0 10px rgba(18, 18, 32, 0.20);
+  color: #fff;
+}

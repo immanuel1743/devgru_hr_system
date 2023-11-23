@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.naver.erp.GyeoljaeDAO">
+   
+   <sql id="gyeoljaeWhere">
+         <if test="keyword1!=null and keyword1.length()>0">
+                  and (
+                     upper(title) like upper('%${keyword1}%')
+                     or
+                     upper(content) like upper('%${keyword1}%')
+                     or
+                     (select upper(dName) from dev_employee d where g.writer = d.dev_num ) like upper('%한별%')
+                  )
+         </if>
+         <if test = "progress!='전체' and progress!=null and progress.length>0">
+            and gyeoljae_progress = #{progress}
+         </if>
+         
+         
+         <if test = "dev_id!='xyz' and dev_id!=null and dev_id.length>0">
+            and #{dev_id} = (select d.id from dev_employee d where d.dev_num=writer)
+         </if>
+   </sql>
+         
+   <insert id="insertGyeoljae" parameterType="com.naver.erp.GyeoljaeDTO" >
+      insert  into gyeoljae(
+         gyeoljae_num
+         ,writer
+         ,title
+         ,content
+         ,docu_type
+      ) values (
+         (select 'GJ'||(nvl(max(to_number(substr(gyeoljae_num,3))),0)+1) from gyeoljae)
+         ,(select dev_num from dev_employee where id=#{mid})
+         ,#{title}  
+         ,#{content}  
+         ,#{docu_type}
+      )
+   </insert>
+   
+   <select id="getGyeoljaeListCntAll"  resultType="int">
+         select count(*) from gyeoljae
+   </select>
+   
+   <select id="getGyeoljaeListCnt"  parameterType="com.naver.erp.GyeoljaeSearchDTO" resultType="int">
+         select count(*) from gyeoljae g
+         where
+            1=1
+            <include refid="gyeoljaeWhere"/>
+   </select>
+
+   <select id="getGyeoljaeList"  parameterType="com.naver.erp.GyeoljaeSearchDTO" resultType="java.util.HashMap">
+       select * from ( select  rownum RNUM, zxcvb.* from  (
+         select  
+            (select d.id from dev_employee d where d.dev_num=g.writer)  as "writer"
+            ,title                               as "title"
+            ,content                                as "content"
+            ,to_char( reg_date,'YYYY-MM-DD am hh:mi')       as "reg_date"
+            ,gyeoljae_progress as "gyeoljae_progress"
+            ,gyeoljae_num as "gyeoljae_num"
+         from 
+            gyeoljae g      
+         where
+         1=1
+         
+         
+         <include refid="gyeoljaeWhere"/>
+         
+         order by reg_date desc
+      <![CDATA[
+         ) zxcvb) where  RNUM  >= #{begin_rowNo}  and RNUM <= #{end_rowNo}
+      ]]>
+   </select>
+   
+   <select id="getGyeoljae" parameterType="java.lang.String" resultType="com.naver.erp.GyeoljaeDTO">
+      select 
+         gyeoljae_num  "gyeoljae_num"
+         ,title           "title"
+         ,(select dName from dev_employee where g.writer=dev_num)      "writer"
+         ,to_char(reg_date,'yyyy-mm-dd hh24:mi')     "reg_date" 
+         ,to_char(gyeoljae_progress_date,'yyyy-mm-dd hh24:mi')     "gyeoljae_progress_date" 
+         ,gyeoljae_progress      "gyeoljae_progress"
+         ,(select id from dev_employee where g.writer=dev_num) "mid"
+         ,docu_type "docu_type"
+         ,content "content"
+      from 
+         gyeoljae g
+      where
+         gyeoljae_num=#{gyeoljae_num}
+   </select>
+   
+   <update id="updateProgress" parameterType="com.naver.erp.GyeoljaeDTO">
+      update 
+         gyeoljae
+      set
+         gyeoljae_progress = #{result}
+         ,gyeoljae_progress_date = sysdate
+      where 
+         gyeoljae_num=#{gyeoljae_num}
+   </update>
+   
+   <update id="updateGyeoljae" parameterType="com.naver.erp.GyeoljaeDTO">
+      update 
+         gyeoljae
+      set
+         title=#{title}
+         ,content=#{content}
+         ,docu_type=#{docu_type}
+         
+      where 
+         gyeoljae_num=#{gyeoljae_num}
+   </update>
+   <delete id="deleteGyeoljae"  parameterType="com.naver.erp.GyeoljaeDTO" >
+      delete from gyeoljae
+      where
+         gyeoljae_num=#{gyeoljae_num} 
+   </delete>
+</mapper>

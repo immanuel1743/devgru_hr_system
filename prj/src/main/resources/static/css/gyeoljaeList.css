@@ -1,0 +1,355 @@
+select,
+input,
+textarea {
+	outline: none;
+  resize: none;
+}
+body {
+  padding: 0; margin: 0;
+  font-size: 12px;
+  height: 100vh;
+}
+* {
+  box-sizing: border-box;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* ----------- */
+.isCate.active {
+  color: #fff;
+  background: #0000CD;
+  border-radius: 3px;
+  padding: 5px;
+}
+input[type="button"] {
+  cursor: pointer;
+}
+.dev_user input {
+  margin: 0 10px 0 0;
+}
+header {
+  font-size: 20px;
+  margin: 10px 5px 20px;
+  border-bottom: 1px solid #0000CD;
+  padding: 0 0 10px;
+}
+select:not(.rowCntPerPage),
+textarea,
+input {
+  transition: .25s;
+  font-size: 12px;
+  border-radius: 3px;
+  font-size: 12px;
+  border: 1px solid lightgrey;
+  padding: 5px 10px;
+}
+.rowCntPerPage {
+  margin: 0 5px 0 0;
+  border: 1px solid lightgray;
+}
+select:focus,
+textarea:focus,
+input:focus {
+  border: 1px solid #0000CD;
+}
+textarea {
+  width: 100%;
+}
+body {
+  display: flex;
+  width: 100%;
+}
+body > form {
+  padding: 15px;
+}
+body > form:first-child {
+  z-index: 1;
+  width: 15%;
+  box-shadow: 0 0 10px rgb(0 , 0, 0, 0.09);
+}
+body > form:last-of-type {
+  width: 85%;
+}
+.boardForm {
+  background: rgba(223, 223, 255, 0.3);
+  overflow: scroll;
+}
+.boardForm > div {
+  border: 1px solid #fff;
+  border-radius: 0 0 5px 5px;
+  margin: 0 0 10px;
+  background: #fff;
+}
+.boardForm > div:first-child {
+  padding: 0 0 20px;
+}
+.header_box {
+  height: 100%;
+  position: relative;
+}
+.cate_box {
+  display: flex;
+  flex-direction: column;
+  margin: 30px 0 0;
+  gap: 15px;
+  color: dimgray;
+  font-size: 12px;
+}
+.main_cate {
+  transition: .25s;
+  cursor: pointer;
+}
+.main_cate:hover,
+.main_cate.active {
+  color: #0000CD;
+  font-weight: bold;
+}
+.logo {
+  width: fit-content;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  margin: 0 0 0 3px;
+  
+  font-weight: bold;
+}
+.welcome_user {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  transform: translateY(-50%);
+}
+.welcome_user > div:first-child {
+  border-right: 1px solid lightgray;
+  font-size: 12px;
+  padding: 0 8px 0 0;
+}
+.welcome_name {
+  display: inline-block;
+  border-bottom: 1px solid rgb(34, 30, 232, .5);
+}
+.logout_btn {
+  margin: 0 0 0 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  color: dimgray;
+}
+.boardForm {
+  background: rgba(223, 223, 255, 0.3);
+}
+.search_bar {
+  width: 100%;
+  background: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid lightgray;
+  text-align: center;
+}
+.search_btn {
+  color: #fff;
+  background: #0000CD;
+  border: none;
+}
+.searchResultCnt {
+  display: flex;
+  margin: 30px 0 5px;
+  font-size: 12px;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8 5px;
+  background: #fff;
+}
+.impect {
+  color: #0000CD;
+  font-weight: bold;
+}
+.tableA10 {
+  width: 100%;
+  text-align: center;
+}
+.cate {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 20px 15px;
+}
+.cate div {
+  font-weight: bold;
+}
+.search_con {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 15px;
+}
+.search_header {
+  position: relative;
+  display: flex;
+  margin: 30px 0 5px;
+  border-bottom: 2px solid #0000CD !important;
+  border-top: 2px solid #0000CD !important; 
+  width: 100%;
+  gap: 10px;
+  font-weight: bold;
+  justify-content: center;
+  text-align: center;
+ }
+ .search_header > div {
+  padding: 10px;
+  margin: 5px 0;
+ }
+ .search_header > div:not(:last-child) {
+  border-right: 1px solid lightgray;
+ }
+ .search_con >  div:first-child,
+ .search_header > div:first-child {
+  width : 10%;
+ }
+ .search_con >  div:nth-child(2),
+ .search_header > div:nth-child(2) {
+  width : 50%;
+ }
+ .search_con >  div:nth-child(3),
+ .search_header > div:nth-child(3) {
+  width : 20%;
+ }
+ .search_con >  div:last-child,
+ .search_header > div:last-child {
+  width : 20%;
+  align-items: center;
+  justify-content: center;
+ }
+.search_con:not(:last-child) {
+  border-bottom: 1px solid #eee;
+}
+.subject {
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.b_no {
+  text-align: center;
+  width: 5%;
+  margin: 0 20px 0 0;
+}
+.search_con .b_no {
+  padding: 5px 0;
+}
+.pageNos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0;
+  margin: 10px 0 0;
+}
+.pageNos span:not(.isClick) {
+  cursor: pointer;
+}
+.isClick,
+.unClick {
+  display: inline-block;
+  width: 20px; height: 20px;
+  text-align: center;
+  line-height: 20px;
+  border-radius: 3px;
+}
+.isClick {
+  background: #0000CD;
+  color: #fff;
+}
+.unClick {
+  transition: .25s;
+}
+.unClick:hover {
+  font-weight: bold;
+  color: #0000CD;
+}
+section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.cntSearch {
+  border-right: 1px solid #0000CD;
+  padding: 0 10px 0 0;
+}
+.rownum {
+  margin: 0 0 0 10px;
+}
+.isNew > .b_no {
+  color: #0000CD;
+  border: 1px solid #0000CD;
+  font-weight: bold;
+  border-radius: 5px;
+}
+.search_con:hover .subject {
+  text-decoration: underline;
+}
+.searchbar_box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.search_list {
+  text-align: center;
+}
+.search_con {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.list_reg,
+.readcount {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.readcount {
+  width: 40px;
+}
+.view_i i {
+  height: 15px;
+}
+.isEmpty {
+  text-align: center;
+  margin: 240px 0;
+  font-size: 14px;
+  color: dimgray;
+}
+.isEmpty i {
+  display: block;
+  font-size: 30px;
+  margin: 0 0 20px;
+}
+.newBoard_btn {
+  cursor: pointer;
+  transition: .25s;
+}
+.newBoard_btn:hover {
+  color: #0000CD;
+}
+.search_list .gyeoljae_progress  {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search_list .gyeoljae_progress > div {
+  color: #fff;
+  background: #0000CD;
+  border-radius: 3px;
+  padding: 3px 5px;
+  margin: 0 10px 0 0;
+  width: fit-content;
+}

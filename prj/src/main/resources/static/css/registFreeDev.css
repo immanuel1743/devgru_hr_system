@@ -1,0 +1,177 @@
+select,
+input,
+textarea {
+	outline: none;
+  resize: none;
+}
+body {
+  padding: 0; margin: 0;
+  font-size: 12px;
+  height: 100vh;
+}
+* {
+  box-sizing: border-box;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* ----------- */
+header {
+  font-size: 20px;
+}
+select,
+textarea,
+input {
+  transition: .25s;
+  font-size: 12px;
+  border-radius: 3px;
+  font-size: 12px;
+  border: 1px solid lightgrey;
+  padding: 5px 10px;
+}
+select:focus,
+textarea:focus,
+input:focus {
+  border: 1px solid rgb(34, 30, 232);
+}
+textarea {
+  width: 100%;
+}
+body {
+  display: flex;
+  width: 100%;
+}
+body > form.boardForm {
+  padding: 25px;
+  width: 85%;
+}
+body > form.boardForm:first-child {
+  z-index: 1;
+  width: 15%;
+  box-shadow: 0 0 10px rgb(0 , 0, 0, 0.09);
+}
+body > form.boardForm:last-of-type {
+  width: 85%;
+}
+body > form.header {
+  padding: 15px;
+  font-size: 12px;
+}
+body > form.header:first-child {
+  z-index: 1;
+  width: 15%;
+  box-shadow: 0 0 10px rgb(0 , 0, 0, 0.09);
+}
+body > form.header:last-of-type {
+  width: 85%;
+}
+.boardForm {
+  background: rgba(223, 223, 255, 0.3);
+  overflow: scroll;
+  font-size: 12px;
+}
+.boardForm > div {
+  border-radius: 5px;
+  margin: 0 0 10px;
+  background: #fff;
+  border-bottom: 1px solid lightgrey;
+  padding: 15px;
+}
+.boardForm > div:first-child {
+  padding: 0 0 20px;
+}
+.header_box {
+  height: 100%;
+  position: relative;
+}
+.cate_box {
+  display: flex;
+  flex-direction: column;
+  margin: 30px 0 0;
+  gap: 15px;
+  color: dimgray;
+  font-size: 12px;
+}
+.main_cate {
+  transition: .25s;
+  cursor: pointer;
+}
+.main_cate:hover,
+.main_cate.active {
+  color: rgb(34, 30, 232);
+  font-weight: bold;
+}
+.logo {
+  width: fit-content;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  margin: 0 0 0 3px;
+  
+  font-weight: bold;
+}
+.welcome_user {
+  display: flex;
+  position: absolute;
+  bottom: 0;
+  transform: translateY(-50%);
+}
+.welcome_user > div:first-child {
+  border-right: 1px solid lightgray;
+  font-size: 12px;
+  padding: 0 8px 0 0;
+}
+.welcome_name {
+  display: inline-block;
+}
+.logout_btn {
+  margin: 0 0 0 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  color: dimgray;
+}
+.cancel,
+.save {
+  display: inline-block;
+  border-radius: 5px;
+  width: 100px; height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-weight: 400;
+  margin: 10px 0 0;
+  font-size: 14px;
+  padding: 0 10px;
+  transition: .25s;
+  color: rgb(34, 30, 232);
+  background: #fff;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.save {
+  background-color: rgb(34, 30, 232);
+  color: #fff;
+}
+.cancel {
+  border: 1px solid lightgrey;
+}
+.save:hover {
+  box-shadow: 0 0 10px rgba(18, 18, 32, 0.20);
+}
+.title {
+  font-weight: bold;
+  font-size: 12px;
+  margin: 0 0 10px;
+  border-bottom: 1px solid lightgray;
+  padding: 0 0 12px;
+}
+.boardForm > div > div:not(.title, :last-child) {
+  margin: 0 0 10px;
+}
+.dumP_form {
+  position: absolute;
+}

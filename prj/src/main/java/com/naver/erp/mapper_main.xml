@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.naver.erp.MainDAO">
+    
+	<select id="getMainList" resultType="java.util.Map">
+	   SELECT
+	    t.fpj AS "on_dispatch_free",
+	    t.fpe AS "due_dispatch_free",
+	    t.fpn AS "can_dispatch_free",
+	    t.dpj AS "on_dispatch_dev",
+	    t.dpe AS "due_dispatch_dev",
+	    t.dpn AS "can_dispatch_dev",
+	    t.pe AS "due_prj",
+	    t.p AS "on_prj",
+	    t.pc AS "end_prj",
+	    t.dev_count AS "dev_count",   
+	    t.free_count AS "free_count", 
+	    t.prj_count AS "prj_count"
+	FROM (
+	<![CDATA[
+	     SELECT
+	        COALESCE((SELECT COUNT(*)
+	                  FROM prj_join_dev_info pj
+	                  WHERE all_dev_num LIKE '%F%'
+	                  AND EXISTS (SELECT 1
+	                              FROM prj p
+	                              WHERE pj.prj_num = p.prj_num
+	                                AND min_period <= SYSDATE)), 0) AS fpj,
+	        COALESCE((SELECT COUNT(*)
+	                  FROM prj_join_dev_info pj
+	                  WHERE all_dev_num LIKE '%F%'
+	                  AND EXISTS (SELECT 1
+	                              FROM prj p
+	                              WHERE pj.prj_num = p.prj_num
+	                                AND min_period > SYSDATE)), 0) AS fpe,
+	        COALESCE((SELECT COUNT(*)
+	                  FROM freelancer
+	                  WHERE free_num NOT IN (SELECT all_dev_num FROM prj_join_dev_info)), 0) AS fpn,
+	        COALESCE((SELECT COUNT(*)
+	                  FROM prj_join_dev_info pj
+	                  WHERE all_dev_num LIKE '%D%'
+	                  AND EXISTS (SELECT 1
+	                              FROM prj p
+	                              WHERE pj.prj_num = p.prj_num
+	                                AND min_period <= SYSDATE)), 0) AS dpj,
+	        COALESCE((SELECT COUNT(*)
+	                  FROM prj_join_dev_info pj
+	                  WHERE all_dev_num LIKE '%D%'
+	                  AND EXISTS (SELECT 1
+	                              FROM prj p
+	                              WHERE pj.prj_num = p.prj_num
+	                                AND min_period > SYSDATE)), 0) AS dpe,
+	        COALESCE((SELECT COUNT(*)
+	                  FROM freelancer
+	                  WHERE free_num NOT IN (SELECT all_dev_num FROM prj_join_dev_info)), 0) AS dpn,
+	        COALESCE((SELECT COUNT(*)
+	                  FROM prj
+	                  WHERE min_period >= SYSDATE), 0) AS pe,
+	        COALESCE((SELECT COUNT(*)
+	                  FROM prj
+	                  WHERE min_period < SYSDATE), 0) AS p,
+	        COALESCE((SELECT COUNT(*)
+	                  FROM prj
+	                  WHERE max_period < SYSDATE), 0) AS pc,
+	        (SELECT COUNT(*)
+	         FROM dev_employee) AS dev_count,
+	           
+	        (SELECT COUNT(*)
+	         FROM freelancer) AS free_count,
+	          
+	        (SELECT COUNT(*)
+	        FROM prj) AS prj_count
+	         
+	    FROM dual
+	) t
+	   ]]>
+	</select>
+</mapper>

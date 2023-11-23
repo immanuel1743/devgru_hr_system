@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.naver.erp.DispatchDAO">
+	<sql id="dispatchSort">
+  		order by 
+	  	<if test="dispatchSort1 != null and dispatchSort1 != ''">
+	        ${dispatchSort1},
+	    </if>
+	  	<if test="dispatchSort2 != null and dispatchSort2 != ''">
+	        ${dispatchSort2},
+	    </if>
+	  	<if test="dispatchSort3 != null and dispatchSort3 != ''">
+	       	${dispatchSort3},
+	    </if>
+	  	<if test="dispatchSort4 != null and dispatchSort4 != ''">
+	        ${dispatchSort4},
+	    </if>
+	  	<if test="dispatchSort5 != null and dispatchSort5 != ''">
+	        ${dispatchSort5},
+	    </if>
+	  	<if test="dispatchSort6 != null and dispatchSort6 != ''">
+	        ${dispatchSort6},
+	    </if>
+	  	<if test="dispatchSort7 != null and dispatchSort7 != ''">
+	        ${dispatchSort7},
+	    </if>
+	  	<if test="dispatchSort8 != null and dispatchSort8 != ''">
+	        ${dispatchSort8},
+	    </if>
+  		sub.all_dev_num
+  	
+  	</sql>
+	<sql id="prjSort">
+  		order by 
+	  	<if test="prjSort1 != null and prjSort1 != ''">
+	        ${prjSort1},
+	    </if>
+	    <if test="prjSort2 != null and prjSort2 != ''">
+	        ${prjSort2},
+	    </if>
+	    <if test="prjSort3 != null and prjSort3 != ''">
+	        ${prjSort3},
+	    </if>
+	    <if test="prjSort4 != null and prjSort4 != ''">
+	        ${prjSort4},
+	    </if>
+	    <if test="prjSort5 != null and prjSort5 != ''">
+	        ${prjSort5},
+	    </if>
+	  	p.prj_num
+  	
+  	</sql>
+    <sql id="prjWhere">
+         
+    <if test="min_dispatch_start_date!=null and min_dispatch_start_date.length()>0 and max_dispatch_start_date!=null and max_dispatch_start_date.length()>0">
+	     AND
+	     P.MIN_PERIOD BETWEEN TO_DATE(#{min_dispatch_start_date}, 'yyyy-mm-dd') AND TO_DATE(#{max_dispatch_start_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_dispatch_start_date!=null and min_dispatch_start_date.length()>0">
+	     AND
+	     P.MIN_PERIOD >= TO_DATE(#{min_dispatch_start_date}, 'yyyy-mm-dd')
+     </if>
+    <if test="min_dispatch_finish_date!=null and min_dispatch_finish_date.length()>0 and max_dispatch_finish_date!=null and max_dispatch_finish_date.length()>0">
+        AND
+       P.MAX_PERIOD BETWEEN TO_DATE(#{min_dispatch_finish_date}, 'yyyy-mm-dd') AND TO_DATE(#{max_dispatch_finish_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_dispatch_finish_date!=null and min_dispatch_finish_date.length()>0">
+        AND
+       P.MAX_PERIOD >= TO_DATE(#{min_dispatch_finish_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_dispatchTerm!=null and min_dispatchTerm.length()>0 and max_dispatchTerm!=null and max_dispatchTerm.length()>0">
+        AND
+       (P.MAX_PERIOD - P.Min_PERIOD)/30 BETWEEN ${min_dispatchTerm} AND ${max_dispatchTerm}
+     </if>
+     <if test="min_dispatchTerm!=null and min_dispatchTerm.length()>0">
+        AND
+       (P.MAX_PERIOD - P.Min_PERIOD)/30 >= ${min_dispatchTerm}
+     </if>
+    <if test="min_dev_year!=null and min_dev_year.length()>0 and max_dev_year!=null and max_dev_year.length()>0">
+        AND
+       (SELECT worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) BETWEEN ${min_dev_year} AND ${max_dev_year}
+     </if>
+     <if test="min_dev_year!=null and min_dev_year.length()>0">
+        AND
+       (SELECT worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) >= ${min_dev_year}
+     </if>
+    <if test="min_operate_year!=null and min_operate_year.length()>0 and max_operate_year!=null and max_operate_year.length()>0">
+        AND 
+       (SELECT POPI.worked_year FROM PRJ_OPER_PERSON_INFO POPI WHERE p.PRJ_NUM=POPI.PRJ_NUM) BETWEEN ${min_operate_year} AND ${max_operate_year}
+     </if>
+     <if test="min_operate_year!=null and min_operate_year.length()>0">
+        AND 
+       (SELECT POPI.worked_year FROM PRJ_OPER_PERSON_INFO POPI WHERE p.PRJ_NUM=POPI.PRJ_NUM)>= ${min_operate_year} 
+     </if>
+    <if test="min_design_year!=null and min_design_year.length()>0 and max_design_year!=null and max_design_year.length()>0">
+        AND 
+       (SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) BETWEEN ${min_design_year} AND ${max_design_year}
+     </if>
+     <if test="min_design_year!=null and min_design_year.length()>0">
+        AND 
+       (SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) >= ${min_design_year}
+     </if>
+    <if test="min_publish_year!=null and min_publish_year.length()>0 and max_publish_year!=null and max_publish_year.length()>0">
+        AND 
+       (SELECT PPLI.worked_year FROM PRJ_PUBL_PERSON_INFO PPLI WHERE p.PRJ_NUM=PPLI.PRJ_NUM) BETWEEN ${min_publish_year} AND ${max_publish_year} 
+     </if>
+     <if test="min_publish_year!=null and min_publish_year.length()>0">
+        AND 
+       (SELECT PPLI.worked_year FROM PRJ_PUBL_PERSON_INFO PPLI WHERE p.PRJ_NUM=PPLI.PRJ_NUM)>= ${min_publish_year}
+     </if>
+    <if test="license!=null and license.size()>0">
+        AND (
+          REGEXP_LIKE(
+          (
+            SELECT FLC.license FROM
+            (SELECT 
+              pno,
+              LISTAGG(license,  ', ')
+              WITHIN GROUP(ORDER BY license) license
+              FROM
+              (
+                SELECT prj_num pno, license_code as license FROM PRJ_DEV_LICENSE_INFO PDLI  UNION
+                SELECT prj_num, license_code FROM PRJ_DEV_LICENSE_INFO PDLI
+              ) x
+              GROUP BY pno
+            ) FLC
+              WHERE p.prj_num  = FLC.pno
+          )
+          , 
+        <foreach item="tmp" collection="license" open="'" close="'" separator=" || "> 
+             ${tmp}
+          </foreach>
+          )
+        OR
+          REGEXP_LIKE(
+          (
+            SELECT FLC.license FROM
+            (SELECT 
+              pno,
+              LISTAGG(license,  ', ')
+              WITHIN GROUP(ORDER BY license) license
+              FROM
+              (
+                SELECT prj_num pno, license_code as license FROM PRJ_OPER_LICENSE_INFO POLI  UNION
+                SELECT prj_num, license_code FROM PRJ_OPER_LICENSE_INFO POLI
+              ) x
+              GROUP BY pno
+            ) FLC
+              WHERE p.prj_num  = FLC.pno
+          ) 
+          , 
+        <foreach item="tmp" collection="license" open="'" close="'" separator=" || "> 
+             ${tmp}
+          </foreach>
+          )
+        OR
+          REGEXP_LIKE(
+          (
+              SELECT FLC.license FROM
+              (SELECT 
+                pno,
+                LISTAGG(license,  ', ')
+                WITHIN GROUP(ORDER BY license) license
+                FROM
+                (
+                  SELECT prj_num pno, license_code as license FROM PRJ_DESI_LICENSE_INFO PDLI  UNION
+                  SELECT prj_num, license_code FROM PRJ_DESI_LICENSE_INFO PDLI
+                ) x
+                GROUP BY pno
+              ) FLC
+                WHERE p.prj_num  = FLC.pno
+            ) 
+          , 
+        <foreach item="tmp" collection="license" open="'" close="'" separator=" || "> 
+             ${tmp}
+          </foreach>
+          )
+        OR
+          REGEXP_LIKE(
+          (
+            SELECT FLC.license FROM
+            (SELECT 
+              pno,
+              LISTAGG(license,  ', ')
+              WITHIN GROUP(ORDER BY license) license
+              FROM
+              (
+                SELECT prj_num pno, license_code as license FROM PRJ_PUBL_LICENSE_INFO PDLI  UNION
+                SELECT prj_num, license_code FROM PRJ_PUBL_LICENSE_INFO PDLI
+              ) x
+              GROUP BY pno
+            ) FLC
+              WHERE p.prj_num  = FLC.pno
+          ) 
+          , 
+        <foreach item="tmp" collection="license" open="'" close="'" separator=" || "> 
+             ${tmp}
+          </foreach>
+          ))
+       </if>
+     <if test="min_reg_date != null and min_reg_date.length() > 0 and max_reg_date != null and max_reg_date.length() > 0">
+         AND
+         reg_date between to_date(#{min_reg_date}, 'yyyy-mm-dd') and to_date(#{max_reg_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_reg_date != null and min_reg_date.length() > 0">
+         AND
+         reg_date >= to_date(#{min_reg_date}, 'yyyy-mm-dd')
+     </if>
+         
+      <if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+            and (
+      </if>
+      <if test="keyword1!=null and keyword1.length()>0">
+        (
+            upper(prj_name) like upper('%${keyword1}%')
+          or
+            REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%'))
+          or
+            REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_OPER_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%'))
+          or
+            REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%'))
+          or
+            REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_PUBL_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%'))
+          or
+           upper(work_content) like upper('%${keyword1}%')
+          or
+           upper(client_company) like upper('%${keyword1}%')
+          or
+           upper(work_place) like upper('%${keyword1}%')
+           )
+      </if>
+      <if test="(keyword1!=null and keyword1.length()>0) and (keyword2!=null and keyword2.length()>0)">
+         ${orand}
+      </if>
+      <if test="keyword2!=null and keyword2.length()>0">
+            (
+            upper(prj_name) like upper('%${keyword2}%')
+          or
+            REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword2}%'))
+          or
+            REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_OPER_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword2}%'))
+          or
+            REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM),  upper('%${keyword2}%'))
+          or
+            REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_PUBL_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM),  upper('%${keyword2}%'))
+          or
+           upper(work_content) like upper('%${keyword2}%')
+          or
+           upper(client_company) like upper('%${keyword2}%')
+          or
+           upper(work_place) like upper('%${keyword2}%')
+           )
+      </if>
+      <if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+            )
+      </if>
+     </sql>
+
+
+    <sql id="dispatchWhere">    
+		<if test="is_retire!=null and is_retire.size()==1 and is_retire[0]==1">
+			and
+		 	sub.all_dev_num not in (select dr.dev_num FROM dev_retire_list dr)
+		</if>
+		<if test="is_retire!=null and is_retire.size()==1 and is_retire[0]==2">
+			and
+		 	sub.all_dev_num in (select dr.dev_num FROM dev_retire_list dr)
+		</if>
+		<if test="min_worked_month!=null and min_worked_month.length()>0 and max_worked_month!=null and max_worked_month.length()>0">
+			and
+			ceil((p.max_period-p.min_period)/30) between ${min_worked_month} and ${max_worked_month}
+		</if>
+		<if test="min_worked_month!=null and min_worked_month.length()>0">
+			and
+			ceil((p.max_period-p.min_period)/30) >= ${min_worked_month}
+		</if>
+		<if test="min_dispatch_start_date1!=null and min_dispatch_start_date1.length()>0 and max_dispatch_start_date1!=null and max_dispatch_start_date1.length()>0">
+			and
+			min_period between to_date(#{min_dispatch_start_date1},'yyyy-mm-dd') and to_date(#{max_dispatch_start_date1},'yyyy-mm-dd')
+		</if>
+		<if test="min_dispatch_start_date1!=null and min_dispatch_start_date1.length()>0">
+			and
+			min_period >= to_date(#{min_dispatch_start_date1},'yyyy-mm-dd')
+		</if>
+		<if test="min_dispatch_finish_date1!=null and min_dispatch_finish_date1.length()>0 and max_dispatch_finish_date!=null and max_dispatch_finish_date1.length()>0">
+			and
+			max_period between to_date(#{min_dispatch_finish_date1},'yyyy-mm-dd') and to_date(#{max_dispatch_finish_date1},'yyyy-mm-dd')
+		</if>
+		<if test="min_dispatch_finish_date1!=null and min_dispatch_finish_date1.length()>0">
+			and
+			max_period >= to_date(#{min_dispatch_finish_date1},'yyyy-mm-dd')
+		</if>
+		<if test="dispatch_finish_date!=null and dispatch_finish_date.size()==1 and dispatch_finish_date[0]==1">
+			and
+			max_period is not null
+		</if>
+		<if test="dispatch_finish_date!=null and dispatch_finish_date.size()==1 and dispatch_finish_date[0]==2">
+			and
+			max_period is null
+		</if>
+		<if test="min_worked_year!=null and min_worked_year.length()>0 and max_worked_year!=null and max_worked_year.length()>0">
+			and 
+			to_number(REGEXP_SUBSTR(sub.dev_year, '\d+')) between ${min_worked_year} and ${max_worked_year}
+		</if>
+		<if test="min_worked_year!=null and min_worked_year.length()>0">
+			and 
+			to_number(REGEXP_SUBSTR(sub.dev_year, '\d+')) >= ${min_worked_year}
+		</if>
+		<if test="dispatch_role!=null and dispatch_role.size()>0">
+			and
+			sub.dispatch_role in (
+			<foreach item="tmp" collection="dispatch_role" separator=" , "> 
+              '${tmp}'
+           </foreach>
+           )
+		</if> 
+		
+		<if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+            and (
+      	</if>
+     	<if test="keyword1!=null and keyword1.length()>0">
+        	((sub.all_dev_name like '%${keyword1}%')
+            or
+            (sub.phone like '%${keyword1}%')
+            or
+            (sub.email like '%${keyword1}%')  
+            or
+            (p.prj_name like '%${keyword1}%')
+            or
+            ((SELECT cdr.dispatch_role_name FROM code_dispatch_role cdr WHERE sub.dispatch_role = cdr.dispatch_role_code) like '%${keyword1}%'))
+       </if>
+       <if test="(keyword1!=null and keyword1.length()>0) and (keyword2!=null and keyword2.length()>0)">
+       		${orand}
+       </if>
+       <if test="keyword2!=null and keyword2.length()>0">
+            ((sub.all_dev_name like '%${keyword2}%')
+            or
+            (sub.phone like '%${keyword2}%')
+            or
+            (sub.email like '%${keyword2}%')  
+            or
+            (p.prj_name like '%${keyword2}%')
+            or
+            ((SELECT cdr.dispatch_role_name FROM code_dispatch_role cdr WHERE sub.dispatch_role = cdr.dispatch_role_code) like '%${keyword2}%'))
+       </if>
+      <if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+            )
+      </if>
+	</sql>
+
+
+	<insert id="insertDispatchInfo" parameterType="com.naver.erp.DispatchDAO" >
+		insert  into dev_employee(
+			dev_num
+			,ID
+			,pwd
+			,dName
+			,jumin_num
+			,phone
+			,email
+			,go_army
+			,address
+			,salary_bank
+			,account_num
+			) values (
+			(select 'D'||(nvl(max(to_number(substr(dev_num,2))),0)+1) from dev_employee)
+			,#{id}
+			,#{pwd}  
+			,#{dName} 
+			,#{jumin_num1}||#{jumin_num2}			
+			,#{phone}
+			,#{email}
+			,#{go_army}
+			,#{address}
+			,#{salary_bank}
+			,#{account_num}
+			)
+	</insert>
+
+	
+
+	<select id="getDispatchListCntAll" resultType="int">
+		select count(*) from prj_join_dev_info
+	</select>
+	<select id="getDispatchListCnt" parameterType="com.naver.erp.DispatchDTO" resultType="int">
+		select count(*) 
+		FROM prj_join_dev_info pjd
+			JOIN
+			    (
+			        SELECT 
+			            de.dev_num || '' AS all_dev_num,
+			            de.dName || '' AS all_dev_name,
+			            de.phone || '' AS phone,
+			            de.email || '' AS email,
+			            UNISTR(
+			            	(TO_NUMBER(TO_CHAR(SYSDATE, 'YYYY')) - TO_NUMBER(TO_CHAR(de.reg_date, 'yyyy'))) || '년' ||
+			                (TO_NUMBER(TO_CHAR(SYSDATE, 'mm')) - TO_NUMBER(TO_CHAR(de.reg_date, 'mm'))+1) || '개월') AS dev_year,
+			            (SELECT cdr.dispatch_role_code FROM code_dispatch_role cdr WHERE dp.dispatch_role = cdr.dispatch_role_code) AS dispatch_role
+			        FROM dev_past_prj_info dp
+			        INNER JOIN dev_employee de ON dp.dev_num = de.dev_num                        
+			        UNION ALL
+			        SELECT                                               
+			            f.free_num || '' AS all_dev_num,
+			            f.fName || '' AS all_dev_name,
+			            f.phone || '' AS phone,
+			            f.email || '' AS email,
+			            SUBSTR(resume_dev_year, 1, 2) || '년' || SUBSTR(resume_dev_year, 3, 2) || '개월' AS dev_year,
+			            (SELECT cdr.dispatch_role_code FROM code_dispatch_role cdr WHERE f.dispatch_role = cdr.dispatch_role_code) AS dispatch_role
+			        FROM freelancer f
+			        INNER JOIN free_year_info fy ON f.free_num = fy.free_num  
+			    ) sub ON sub.all_dev_num = pjd.all_dev_num
+			JOIN
+			    prj p ON pjd.prj_num = p.prj_num
+		where
+			1=1
+    <include refid="dispatchWhere"/>
+			
+	</select>
+	<select id="getDispatchList" parameterType="com.naver.erp.DispatchDTO" resultType="java.util.HashMap">
+		select * from( select rownum RNUM, zxcvb.* from(
+		SELECT
+			sub.all_dev_num "dev_num"
+            ,sub.all_dev_name "dev_name" 
+		    ,sub.phone "phone"
+		    ,sub.email	"email"
+		    ,p.prj_name	"prj_name"
+		    ,sub.dev_year	"dev_year"
+            ,(SELECT cdr.dispatch_role_name FROM code_dispatch_role cdr WHERE sub.dispatch_role = cdr.dispatch_role_code) "dispatch_role"
+		    ,ceil((p.max_period-p.min_period)/30)||'개월' "period"
+		    ,to_char(min_period,'yyyy-mm-dd')               "start_date"
+		    ,nvl(to_char(p.max_period,'yyyy-mm-dd'),'미확정')  "end_date"
+		    ,nvl(ceil(p.max_period-sysdate)||'일','미확정')  	"end_count"
+		    ,(select cooperator_name from code_cooperator_name ccn where p.cooperator_name = ccn.cooperator_name_code) "cooperator_name"
+			FROM
+			    prj_join_dev_info pjd
+			JOIN
+			    (
+			        SELECT 
+			            de.dev_num || '' AS all_dev_num,
+			            de.dName || '' AS all_dev_name,
+			            de.phone || '' AS phone,
+			            de.email || '' AS email,
+			            UNISTR((TO_NUMBER(TO_CHAR(SYSDATE, 'YYYY')) - TO_NUMBER(TO_CHAR(de.reg_date, 'yyyy'))) || '년' ||
+			                   (TO_NUMBER(TO_CHAR(SYSDATE, 'mm')) - TO_NUMBER(TO_CHAR(de.reg_date, 'mm'))) || '개월') AS dev_year,
+			            (SELECT cdr.dispatch_role_code FROM code_dispatch_role cdr WHERE dp.dispatch_role = cdr.dispatch_role_code) AS dispatch_role
+			        FROM dev_past_prj_info dp
+			        INNER JOIN dev_employee de ON dp.dev_num = de.dev_num                        
+			        UNION ALL
+			        SELECT                                               
+			            f.free_num || '' AS all_dev_num,
+			            f.fName || '' AS all_dev_name,
+			            f.phone || '' AS phone,
+			            f.email || '' AS email,
+			            SUBSTR(resume_dev_year, 1, 2) || '년' || SUBSTR(resume_dev_year, 3, 2) || '개월' AS dev_year,
+			            (SELECT cdr.dispatch_role_code FROM code_dispatch_role cdr WHERE f.dispatch_role = cdr.dispatch_role_code) AS dispatch_role
+			        FROM freelancer f
+			        INNER JOIN free_year_info fy ON f.free_num = fy.free_num  
+			    ) sub ON sub.all_dev_num = pjd.all_dev_num
+			JOIN
+			    prj p ON pjd.prj_num = p.prj_num
+			where 1=1
+    <include refid="dispatchWhere"/>
+    <include refid="dispatchSort"/>
+    
+	   <![CDATA[
+	    	) zxcvb) where RNUM>=#{begin_rowNo} and RNUM<=#{end_rowNo} 
+	    ]]>
+    </select>
+    
+	<select id="getAllDevListCnt" parameterType="java.lang.String" resultType="int">
+	select count(*) from prj_join_dev_info where prj_num=#{prj_num}
+	</select>
+			
+<select id="getAllDevList" parameterType="java.lang.String" resultType="java.util.HashMap">
+    WITH ranked_data AS (
+    SELECT 
+        de.dev_num || '' AS "all_dev_num",
+        de.dName || '' AS "all_dev_name",
+        de.phone || '' AS "phone",
+        de.email || '' AS "email",
+        UNISTR((TO_NUMBER(TO_CHAR(SYSDATE, 'YYYY')) - TO_NUMBER(TO_CHAR(de.reg_date, 'yyyy'))) || '년'
+            || (1+TO_NUMBER(TO_CHAR(SYSDATE, 'mm')) - TO_NUMBER(TO_CHAR(de.reg_date, 'mm'))) || '개월') AS "dev_year",
+        (SELECT cdr.dispatch_role_name FROM code_dispatch_role cdr WHERE dp.dispatch_role = cdr.dispatch_role_code) AS "dev_dispatch_role"
+        <if test="prj_num!=null and prj_num.length()>0">
+		,CASE 
+            WHEN pjd.all_dev_num IS NOT NULL THEN
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1 
+                        FROM prj_join_dev_info 
+                        WHERE pjd.prj_num LIKE #{prj_num}
+                        AND (all_dev_num = de.dev_num)
+                        AND ROWNUM = 1
+                    ) THEN '삭제'
+                    ELSE '등록'
+                END
+            ELSE '등록'
+        END ||''AS "is_join",
+        ROW_NUMBER() OVER (PARTITION BY de.dev_num ORDER BY de.dev_num) AS rn
+		</if>
+    FROM 
+        dev_past_prj_info dp 
+    INNER JOIN 
+        dev_employee de ON dp.dev_num = de.dev_num 
+    LEFT JOIN
+        prj_join_dev_info pjd ON pjd.all_dev_num = de.dev_num
+    WHERE 
+        de.dev_num NOT IN (SELECT dr.dev_num FROM dev_retire_list dr)
+    
+    UNION ALL
+    
+    SELECT 
+        f.free_num ||'',
+        f.fName ||'',
+        f.phone ||'',
+        f.email ||'',
+        SUBSTR(resume_dev_year, 1, 2) || '년' || SUBSTR(resume_dev_year, 3, 2) || '개월',
+        (SELECT cdr.dispatch_role_name FROM code_dispatch_role cdr WHERE f.dispatch_role = cdr.dispatch_role_code)
+        <if test="prj_num!=null and prj_num.length()>0">
+		,CASE 
+            WHEN pjd.all_dev_num IS NOT NULL THEN
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1 
+                        FROM prj_join_dev_info 
+                        WHERE pjd.prj_num LIKE #{prj_num}
+                        AND (all_dev_num = f.free_num)
+                        AND ROWNUM = 1
+                    ) THEN '삭제'
+                    ELSE '등록'
+                END
+            ELSE '등록'
+        END ||''AS "is_join",
+        ROW_NUMBER() OVER (PARTITION BY f.free_num ORDER BY f.free_num) AS rn
+		</if>
+    FROM 
+        freelancer f 
+    INNER JOIN 
+        free_year_info fy ON f.free_num = fy.free_num
+    LEFT JOIN
+        prj_join_dev_info pjd ON pjd.all_dev_num = f.free_num
+    WHERE 
+        1 = 1
+	)
+	SELECT 
+	    "all_dev_num",
+	    "all_dev_name",
+	    "phone",
+	    "email",
+	    "dev_year",
+	    "dev_dispatch_role"
+	    <if test="prj_num!=null and prj_num.length()>0">
+		,"is_join"
+		</if>
+	FROM ranked_data
+	<if test="prj_num!=null and prj_num.length()>0">
+	WHERE rn = 1
+	</if>
+	ORDER BY "all_dev_num"
+	
+
+</select>
+
+	
+	<select id="getDispatch" parameterType="int" resultType="com.naver.erp.DispatchDAO">
+		select * from dispatch
+	</select>
+	<select id="getPrjListCntAll"  resultType="int">
+	   select count(*) from prj
+	</select>
+	
+	<select id="getPrjListCnt" parameterType="com.naver.erp.PrjSearchDTO" resultType="int">
+	   select count(*) from prj p where
+	     1=1
+	   <include refid="prjWhere"/>
+	</select>   
+	<select id="getPrjList" parameterType="com.naver.erp.PrjSearchDTO" resultType="java.util.HashMap">
+	    select * from (select rownum RNUM, zxcvb.* from  (
+	    select
+	    	prj_num "prj_num",
+	      prj_name "prj_name",
+	      TO_CHAR(reg_date, 'yyyy"년 "mm"월 "dd"일 "') "reg_date",
+	      TO_CHAR(MIN_PERIOD, 'yyyy"년 "mm"월 "dd"일 "') "start_date",
+	      NVL(TO_CHAR(MAX_PERIOD, 'yyyy"년 "mm"월 "dd"일 "'), '미정')  "finish_date",
+	      NVL(to_char(ceil((MAX_PERIOD - Min_PERIOD)/30)),'미정')  "period",
+	      NVL((SELECT PERSON_NUM FROM PRJ_DEV_PERSON_INFO PDPI WHERE P.PRJ_NUM=PDPI.PRJ_NUM),0) "dev_personnel",
+	      NVL((SELECT PERSON_NUM FROM PRJ_OPER_PERSON_INFO POPI WHERE P.PRJ_NUM=POPI.PRJ_NUM),0) "ope_personnel",
+	      NVL((SELECT PERSON_NUM FROM PRJ_DESI_PERSON_INFO PDPI WHERE P.PRJ_NUM=PDPI.PRJ_NUM),0) "desi_personnel",
+	      NVL((SELECT PERSON_NUM FROM PRJ_PUBL_PERSON_INFO PPPI WHERE P.PRJ_NUM=PPPI.PRJ_NUM),0)  "perb_personnel"
+	    from
+	      prj p
+	    where
+	     1=1
+	    <include refid="prjWhere"/>
+	    <include refid="prjSort"/>
+	    <![CDATA[
+	    ) zxcvb) where  RNUM  >= #{begin_rowNo}  and RNUM <= #{end_rowNo}
+	    ]]>
+	</select>
+  
+  <insert id="insertDispatch" parameterType="com.naver.erp.DispatchSearchDTO">
+  	insert into prj_join_dev_info(
+  		prj_num
+  		,all_dev_num
+  	)values(
+  		#{prj_num}
+  		,#{all_dev_num}
+  	)
+  	
+  </insert>
+  <delete id="deleteDispatch" parameterType="com.naver.erp.DispatchSearchDTO">
+  	delete from prj_join_dev_info
+  	where
+  		prj_num = #{prj_num}
+  		and 
+  		all_dev_num = #{all_dev_num}
+  	
+  	
+  </delete>
+  
+  
+</mapper>

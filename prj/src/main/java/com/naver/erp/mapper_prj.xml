@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.naver.erp.PrjDAO">
+  	<sql id="prjSort">
+	  	order by 
+	  	<if test="prjSort1 != null and prjSort1 != ''">
+	        ${prjSort1},
+	    </if>
+	    <if test="prjSort2 != null and prjSort2 != ''">
+	        ${prjSort2},
+	    </if>
+	    <if test="prjSort3 != null and prjSort3 != ''">
+	        ${prjSort3},
+	    </if>
+	    <if test="prjSort4 != null and prjSort4 != ''">
+	        ${prjSort4},
+	    </if>
+	    <if test="prjSort5 != null and prjSort5 != ''">
+	        ${prjSort5},
+	    </if>
+	  	p.prj_num desc
+  	
+  	</sql>
+
+
+  	<sql id="prjWhere">
+         
+    <if test="min_dispatch_start_date!=null and min_dispatch_start_date.length()>0 and max_dispatch_start_date!=null and max_dispatch_start_date.length()>0">
+	     AND
+	     P.MIN_PERIOD BETWEEN TO_DATE(#{min_dispatch_start_date}, 'yyyy-mm-dd') AND TO_DATE(#{max_dispatch_start_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_dispatch_start_date!=null and min_dispatch_start_date.length()>0">
+	     AND
+	     P.MIN_PERIOD >= TO_DATE(#{min_dispatch_start_date}, 'yyyy-mm-dd')
+     </if>
+    <if test="min_dispatch_finish_date!=null and min_dispatch_finish_date.length()>0 and max_dispatch_finish_date!=null and max_dispatch_finish_date.length()>0">
+        AND
+       P.MAX_PERIOD BETWEEN TO_DATE(#{min_dispatch_finish_date}, 'yyyy-mm-dd') AND TO_DATE(#{max_dispatch_finish_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_dispatch_finish_date!=null and min_dispatch_finish_date.length()>0">
+        AND
+       P.MAX_PERIOD >= TO_DATE(#{min_dispatch_finish_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_dispatchTerm!=null and min_dispatchTerm.length()>0 and max_dispatchTerm!=null and max_dispatchTerm.length()>0">
+        AND
+       (P.MAX_PERIOD - P.Min_PERIOD)/30 BETWEEN ${min_dispatchTerm} AND ${max_dispatchTerm}
+     </if>
+     <if test="min_dispatchTerm!=null and min_dispatchTerm.length()>0">
+        AND
+       (P.MAX_PERIOD - P.Min_PERIOD)/30 >= ${min_dispatchTerm}
+     </if>
+    <if test="min_dev_year!=null and min_dev_year.length()>0 and max_dev_year!=null and max_dev_year.length()>0">
+        AND
+       (SELECT worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) BETWEEN ${min_dev_year} AND ${max_dev_year}
+     </if>
+     <if test="min_dev_year!=null and min_dev_year.length()>0">
+        AND
+       (SELECT worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) >= ${min_dev_year}
+     </if>
+    <if test="min_operate_year!=null and min_operate_year.length()>0 and max_operate_year!=null and max_operate_year.length()>0">
+        AND 
+       (SELECT POPI.worked_year FROM PRJ_OPER_PERSON_INFO POPI WHERE p.PRJ_NUM=POPI.PRJ_NUM) BETWEEN ${min_operate_year} AND ${max_operate_year}
+     </if>
+     <if test="min_operate_year!=null and min_operate_year.length()>0">
+        AND 
+       (SELECT POPI.worked_year FROM PRJ_OPER_PERSON_INFO POPI WHERE p.PRJ_NUM=POPI.PRJ_NUM)>= ${min_operate_year} 
+     </if>
+    <if test="min_design_year!=null and min_design_year.length()>0 and max_design_year!=null and max_design_year.length()>0">
+        AND 
+       (SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) BETWEEN ${min_design_year} AND ${max_design_year}
+     </if>
+     <if test="min_design_year!=null and min_design_year.length()>0">
+        AND 
+       (SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM) >= ${min_design_year}
+     </if>
+    <if test="min_publish_year!=null and min_publish_year.length()>0 and max_publish_year!=null and max_publish_year.length()>0">
+        AND 
+       (SELECT PPLI.worked_year FROM PRJ_PUBL_PERSON_INFO PPLI WHERE p.PRJ_NUM=PPLI.PRJ_NUM) BETWEEN ${min_publish_year} AND ${max_publish_year} 
+     </if>
+     <if test="min_publish_year!=null and min_publish_year.length()>0">
+        AND 
+       (SELECT PPLI.worked_year FROM PRJ_PUBL_PERSON_INFO PPLI WHERE p.PRJ_NUM=PPLI.PRJ_NUM)>= ${min_publish_year}
+     </if>
+    <if test="license!=null and license.size()>0">
+        AND (
+          REGEXP_LIKE(
+          (
+            SELECT FLC.license FROM
+            (SELECT 
+              pno,
+              LISTAGG(license,  ', ')
+              WITHIN GROUP(ORDER BY license) license
+              FROM
+              (
+                SELECT prj_num pno, license_code as license FROM PRJ_DEV_LICENSE_INFO PDLI  UNION
+                SELECT prj_num, license_code FROM PRJ_DEV_LICENSE_INFO PDLI
+              ) x
+              GROUP BY pno
+            ) FLC
+              WHERE p.prj_num  = FLC.pno
+          )
+          , 
+        <foreach item="tmp" collection="license" open="'" close="'" separator=" || "> 
+             ${tmp}
+          </foreach>
+          )
+        OR
+          REGEXP_LIKE(
+          (
+            SELECT FLC.license FROM
+            (SELECT 
+              pno,
+              LISTAGG(license,  ', ')
+              WITHIN GROUP(ORDER BY license) license
+              FROM
+              (
+                SELECT prj_num pno, license_code as license FROM PRJ_OPER_LICENSE_INFO POLI  UNION
+                SELECT prj_num, license_code FROM PRJ_OPER_LICENSE_INFO POLI
+              ) x
+              GROUP BY pno
+            ) FLC
+              WHERE p.prj_num  = FLC.pno
+          ) 
+          , 
+        <foreach item="tmp" collection="license" open="'" close="'" separator=" || "> 
+             ${tmp}
+          </foreach>
+          )
+        OR
+          REGEXP_LIKE(
+          (
+              SELECT FLC.license FROM
+              (SELECT 
+                pno,
+                LISTAGG(license,  ', ')
+                WITHIN GROUP(ORDER BY license) license
+                FROM
+                (
+                  SELECT prj_num pno, license_code as license FROM PRJ_DESI_LICENSE_INFO PDLI  UNION
+                  SELECT prj_num, license_code FROM PRJ_DESI_LICENSE_INFO PDLI
+                ) x
+                GROUP BY pno
+              ) FLC
+                WHERE p.prj_num  = FLC.pno
+            ) 
+          , 
+        <foreach item="tmp" collection="license" open="'" close="'" separator=" || "> 
+             ${tmp}
+          </foreach>
+          )
+        OR
+          REGEXP_LIKE(
+          (
+            SELECT FLC.license FROM
+            (SELECT 
+              pno,
+              LISTAGG(license,  ', ')
+              WITHIN GROUP(ORDER BY license) license
+              FROM
+              (
+                SELECT prj_num pno, license_code as license FROM PRJ_PUBL_LICENSE_INFO PDLI  UNION
+                SELECT prj_num, license_code FROM PRJ_PUBL_LICENSE_INFO PDLI
+              ) x
+              GROUP BY pno
+            ) FLC
+              WHERE p.prj_num  = FLC.pno
+          ) 
+          , 
+        <foreach item="tmp" collection="license" open="'" close="'" separator=" || "> 
+             ${tmp}
+          </foreach>
+          ))
+       </if>
+     <if test="min_reg_date != null and min_reg_date.length() > 0 and max_reg_date != null and max_reg_date.length() > 0">
+         AND
+         reg_date between to_date(#{min_reg_date}, 'yyyy-mm-dd') and to_date(#{max_reg_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_reg_date != null and min_reg_date.length() > 0">
+         AND
+         reg_date >= to_date(#{min_reg_date}, 'yyyy-mm-dd')
+     </if>
+        
+     <if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+           and (
+     </if>
+     <if test="keyword1!=null and keyword1.length()>0">
+       (
+           upper(prj_name) like upper('%${keyword1}%')
+         or
+           REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%'))
+         or
+           REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_OPER_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%'))
+         or
+           REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%'))
+         or
+           REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_PUBL_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword1}%'))
+         or
+           upper(work_content) like upper('%${keyword1}%')
+         or
+           upper(client_company) like upper('%${keyword1}%')
+         or
+           upper(work_place) like upper('%${keyword1}%')
+          )
+     </if>
+     <if test="(keyword1!=null and keyword1.length()>0) and (keyword2!=null and keyword2.length()>0)">
+        ${orand}
+     </if>
+     <if test="keyword2!=null and keyword2.length()>0">
+           (
+           upper(prj_name) like upper('%${keyword2}%')
+         or
+           REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DEV_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword2}%'))
+         or
+           REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_OPER_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM), upper('%${keyword2}%'))
+         or
+           REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_DESI_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM),  upper('%${keyword2}%'))
+         or
+           REGEXP_LIKE((SELECT PDPI.worked_year FROM PRJ_PUBL_PERSON_INFO PDPI WHERE p.PRJ_NUM=PDPI.PRJ_NUM),  upper('%${keyword2}%'))
+         or
+           upper(work_content) like upper('%${keyword2}%')
+         or
+           upper(client_company) like upper('%${keyword2}%')
+         or
+           upper(work_place) like upper('%${keyword2}%')
+         )
+     </if>
+     <if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+           )
+     </if>
+    </sql>
+
+  <insert id="insertPrjInfo" parameterType="com.naver.erp.PrjDTO">
+     insert into prj( 
+     prj_num
+     ,reg_date
+     ,min_period
+     <if test="max_prj_period!=null and max_prj_period.length()>0">
+        ,max_period
+     </if>
+     ,prj_name
+     ,client_company
+     ,work_content
+     ,work_place
+     ,go_work_time
+     ,cooperator_name
+     <if test="prj_etc!=null and prj_etc.length()>0">
+        ,prj_etc
+     </if>
+     ) values ( 
+        (select 'P'||(nvl(max(to_number(substr(prj_num,2))),0)+1) from prj) 
+        ,to_date(#{reg_date}, 'yyyy-mm-dd')
+        ,to_date(#{min_prj_period}, 'yyyy-mm-dd')
+        <if test="max_prj_period!=null and max_prj_period.length()>0"> 
+           ,to_date(#{max_prj_period}, 'yyyy-mm-dd') 
+        </if>
+        ,#{prj_name} 
+        ,#{client_company} 
+        ,#{work_content} 
+        ,#{work_space} 
+        ,#{go_work_hours}||#{go_work_minute}
+        ,#{coperator_name}
+        <if test="prj_etc!=null and prj_etc.length()>0"> 
+           ,#{prj_etc} 
+        </if>
+        )
+  </insert>
+  
+  <insert id="prj_dev_person_info" parameterType="com.naver.erp.PrjDTO"> 
+     insert into 
+        prj_dev_person_info ( prj_num ,worked_year ,person_num ) 
+     values ( 
+        (select prj_num from prj where prj_name=#{prj_name})
+        ,#{year_dev}
+        ,#{person_num_dev} 
+        ) 
+  </insert>
+  <insert id="prj_dev_license_info" parameterType="com.naver.erp.PrjDTO">
+     INSERT INTO prj_dev_license_info ( 
+        prj_num 
+        ,license_code 
+     )
+     <foreach item="tmp" collection="dev_essential_license" separator=" UNION ALL "> 
+        SELECT 
+           (select prj_num from prj where prj_name=#{prj_name}) 
+           ,#{tmp} 
+        FROM DUAL 
+     </foreach>
+  </insert>
+  <insert id="prj_oper_person_info" parameterType="com.naver.erp.PrjDTO"> 
+     insert into prj_oper_person_info (
+        prj_num 
+        ,worked_year 
+        ,person_num 
+     ) values (
+        (select prj_num from prj where prj_name=#{prj_name}) 
+        ,#{year_ope} 
+        ,#{person_num_ope} 
+     ) 
+  </insert>
+  <insert id="prj_oper_license_info" parameterType="com.naver.erp.PrjDTO">
+     INSERT INTO prj_oper_license_info (
+         prj_num 
+         ,license_code 
+      )
+     <foreach item="tmp" collection="ope_essential_license" separator=" UNION ALL "> 
+        SELECT 
+           (select prj_num from prj where prj_name=#{prj_name}) 
+           ,#{tmp} 
+        FROM DUAL 
+     </foreach>
+  </insert>
+  <insert id="prj_publ_person_info" parameterType="com.naver.erp.PrjDTO"> 
+     insert into prj_publ_person_info ( 
+        prj_num 
+        ,worked_year 
+        ,person_num 
+     ) values (
+        (select prj_num from prj where prj_name=#{prj_name})  
+        ,#{year_perb} 
+        ,#{person_num_perb} 
+     ) 
+  </insert>
+  <insert id="prj_publ_license_info" parameterType="com.naver.erp.PrjDTO">
+     INSERT INTO prj_publ_license_info ( 
+        prj_num 
+        ,license_code 
+     )
+     <foreach item="tmp" collection="perb_essential_license" separator=" UNION ALL "> 
+        SELECT 
+           (select prj_num from prj where prj_name=#{prj_name}) 
+           ,#{tmp} 
+        FROM DUAL 
+     </foreach>
+  </insert>
+  <insert id="prj_desi_person_info" parameterType="com.naver.erp.PrjDTO"> 
+     insert into prj_desi_person_info ( 
+        prj_num 
+        ,worked_year 
+        ,person_num 
+     ) values ( 
+        (select prj_num from prj where prj_name=#{prj_name}) 
+        ,#{year_desi} 
+        ,#{person_num_desi} 
+     ) 
+  </insert>
+  <insert id="prj_desi_license_info" parameterType="com.naver.erp.PrjDTO">
+     INSERT INTO prj_desi_license_info ( 
+        prj_num 
+        ,license_code
+     )
+     <foreach item="tmp" collection="desi_essential_license" separator=" UNION ALL "> 
+        SELECT 
+           (select prj_num from prj where prj_name=#{prj_name}) 
+           ,#{tmp} 
+        FROM DUAL 
+     </foreach>
+  </insert>
+
+ <select id="getPrjListCntAll"  resultType="int">
+   select count(*) from prj
+ </select>
+
+
+ <select id="getPrjListCnt" parameterType="com.naver.erp.PrjSearchDTO" resultType="int">
+   select count(*) from prj p where
+     1=1
+   <include refid="prjWhere"/>
+ </select>   
+
+ <select id="getPrjList" parameterType="com.naver.erp.PrjSearchDTO" resultType="java.util.HashMap">
+    select * from (select rownum RNUM, zxcvb.* from  (
+     select
+       prj_num "prj_num",
+       prj_name "prj_name",
+       TO_CHAR(reg_date, 'yyyy"년 "mm"월 "dd"일 "') "reg_date",
+       TO_CHAR(MIN_PERIOD, 'yyyy"년 "mm"월 "dd"일 "') "start_date",
+       NVL(TO_CHAR(MAX_PERIOD, 'yyyy"년 "mm"월 "dd"일 "'), '미정')  "finish_date",
+       NVL2(to_char(ceil((MAX_PERIOD - Min_PERIOD)/30)),to_char(ceil((MAX_PERIOD - Min_PERIOD)/30))||'개월','미정')  "period",
+       NVL((SELECT PERSON_NUM FROM PRJ_DEV_PERSON_INFO PDPI WHERE P.PRJ_NUM=PDPI.PRJ_NUM),0) "dev_personnel",
+       NVL((SELECT PERSON_NUM FROM PRJ_OPER_PERSON_INFO POPI WHERE P.PRJ_NUM=POPI.PRJ_NUM),0) "ope_personnel",
+       NVL((SELECT PERSON_NUM FROM PRJ_DESI_PERSON_INFO PDPI WHERE P.PRJ_NUM=PDPI.PRJ_NUM),0) "desi_personnel",
+       NVL((SELECT PERSON_NUM FROM PRJ_PUBL_PERSON_INFO PPPI WHERE P.PRJ_NUM=PPPI.PRJ_NUM),0)  "perb_personnel"
+     from
+       prj p
+     where
+      1=1
+     
+     <include refid="prjWhere"/>
+     <include refid="prjSort"/>
+     <![CDATA[
+     ) zxcvb) where  RNUM  >= #{begin_rowNo}  and RNUM <= #{end_rowNo}
+     ]]>
+ </select>
+
+
+  <select id="getPrjDetailInfo" parameterType="com.naver.erp.PrjSearchDTO" resultType="java.util.HashMap">
+    select
+      prj_num "prj_num",
+      client_company "client_company",
+      cooperator_name "cooperator_name",
+      go_work_time "go_work_time",
+      to_char(max_period, 'yyyy-mm-dd') "max_period",
+      to_char(min_period, 'yyyy-mm-dd') "min_period",
+      prj_etc "prj_etc",
+      prj_name "prj_name",
+      prj_num "prj_num",
+      to_char(reg_date, 'yyyy-mm-dd') "reg_date",
+      work_content "work_content",
+      work_place "work_place",
+      (SELECT person_num FROM prj_dev_person_info pdp where p.prj_num = pdp.prj_num)  "dev_person_num",
+      (SELECT worked_year FROM prj_dev_person_info pdp where p.prj_num = pdp.prj_num)  "dev_person_year",
+      (
+        SELECT FLC.license FROM
+        (SELECT 
+          pno,
+          LISTAGG(license,  ', ')
+          WITHIN GROUP(ORDER BY license) license
+          FROM
+          (
+            SELECT prj_num pno, license_code as license FROM prj_dev_license_info PDLI  UNION
+            SELECT prj_num, license_code FROM prj_dev_license_info PDLI
+          ) x
+          GROUP BY pno
+        ) FLC
+          WHERE p.prj_num  = FLC.pno
+      ) "dev_license",
+      (SELECT person_num FROM prj_oper_person_info pdp where p.prj_num = pdp.prj_num)  "oper_person_num",
+      (SELECT worked_year FROM prj_oper_person_info pdp where p.prj_num = pdp.prj_num)  "oper_person_year",
+      (
+        SELECT FLC.license FROM
+        (SELECT 
+          pno,
+          LISTAGG(license,  ', ')
+          WITHIN GROUP(ORDER BY license) license
+          FROM
+          (
+            SELECT prj_num pno, license_code as license FROM prj_oper_license_info PDLI  UNION
+            SELECT prj_num, license_code FROM prj_oper_license_info PDLI
+          ) x
+          GROUP BY pno
+        ) FLC
+          WHERE p.prj_num  = FLC.pno
+      ) "oper_license",
+      (SELECT person_num FROM prj_publ_person_info pdp where p.prj_num = pdp.prj_num)  "publ_person_num",
+      (SELECT worked_year FROM prj_publ_person_info pdp where p.prj_num = pdp.prj_num)  "publ_person_year",
+      (
+        SELECT FLC.license FROM
+        (SELECT 
+          pno,
+          LISTAGG(license,  ', ')
+          WITHIN GROUP(ORDER BY license) license
+          FROM
+          (
+            SELECT prj_num pno, license_code as license FROM prj_publ_license_info PDLI  UNION
+            SELECT prj_num, license_code FROM prj_publ_license_info PDLI
+          ) x
+          GROUP BY pno
+        ) FLC
+          WHERE p.prj_num  = FLC.pno
+      ) "publ_license",
+      (SELECT person_num FROM prj_desi_person_info pdp where p.prj_num = pdp.prj_num)  "desi_person_num",
+      (SELECT worked_year FROM prj_desi_person_info pdp where p.prj_num = pdp.prj_num)  "desi_person_year",
+      (
+        SELECT FLC.license FROM
+        (SELECT 
+          pno,
+          LISTAGG(license,  ', ')
+          WITHIN GROUP(ORDER BY license) license
+          FROM
+          (
+            SELECT prj_num pno, license_code as license FROM prj_desi_license_info PDLI  UNION
+            SELECT prj_num, license_code FROM prj_desi_license_info PDLI
+          ) x
+          GROUP BY pno
+        ) FLC
+          WHERE p.prj_num  = FLC.pno
+      ) "desi_license"
+    from
+      prj p
+    where
+      prj_num = '${prj_uid}'
+  </select>
+
+  <update id="updatePrjDetail" parameterType="com.naver.erp.PrjDTO">
+    update
+      prj
+    set
+       prj_name = #{prj_name}
+      ,reg_date = to_date(#{reg_date}, 'yyyy-mm-dd')
+      ,client_company = #{client_company}
+      ,work_content = #{work_content}
+      ,work_place = #{work_space}
+      ,cooperator_name = #{conperator_name}
+      ,go_work_time = #{go_work_hours}||#{go_work_minute}
+      ,prj_etc = #{prj_etc}
+      ,min_period = to_date(#{min_prj_period}, 'yyyy-mm-dd')
+      <if test="max_prj_period!=null and max_prj_period.length()>0">
+        ,max_period = to_date(#{max_prj_period}, 'yyyy-mm-dd')
+      </if>
+      <if test="max_prj_period==null or max_prj_period.length()==0">
+        ,max_period = NULL
+      </if>
+    where
+      prj_num = '${del_prj_uid}'
+  </update>
+
+  <delete id="deletePrj" parameterType="com.naver.erp.PrjDTO">
+    delete from prj where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deletePrjJoin" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_join_dev_info where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deleteDev" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_dev_person_info where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deleteDevLicens" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_dev_license_info where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deleteOper" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_oper_person_info where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deleteOperLicens" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_oper_license_info where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deletePubl" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_publ_person_info where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deletePublLicens" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_publ_license_info where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deleteDesi" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_desi_person_info where prj_num = '${del_prj_uid}'
+  </delete>
+  <delete id="deleteDesiLicens" parameterType="com.naver.erp.PrjDTO">
+    delete from prj_desi_license_info where prj_num = '${del_prj_uid}'
+  </delete>
+</mapper>

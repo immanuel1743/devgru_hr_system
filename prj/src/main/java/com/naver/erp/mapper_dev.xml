@@ -1,0 +1,2052 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.naver.erp.DevDAO">
+<sql id="devSort">
+	order by 
+	    <if test="devSort1 == 'dName asc' or devSort1 == 'dName desc'
+	    			or devSort1 == 'jumin_num asc' or devSort1 == 'jumin_num desc'
+	    			or devSort1 == 'reg_date asc' or devSort1 == 'reg_date desc'">
+	        ${devSort1},
+	    </if>
+	    <if test="devSort1 == 'birth_year asc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) asc,
+	    </if>
+	    <if test="devSort1 == 'birth_year desc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) desc,
+	    </if>
+	    <if test="devSort1 == 'age asc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) asc,
+	    </if>
+	    <if test="devSort1 == 'age desc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) desc,
+	    </if>
+	    <if test="devSort1 == 'highest_edu asc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) asc,
+	    </if>
+	    <if test="devSort1 == 'highest_edu desc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) desc,
+	    </if>
+	    <if test="devSort1 == 'graduate_date asc' or devSort1 == 'graduate_date desc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  asc,
+	    </if>
+	    <if test="devSort1 == 'graduate_date desc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  desc,
+	    </if>
+	    <if test="devSort2 == 'dName asc' or devSort2 == 'dName desc'
+	    			or devSort2 == 'jumin_num asc' or devSort2 == 'jumin_num desc'
+	    			or devSort2 == 'reg_date asc' or devSort2 == 'reg_date desc'">
+	        ${devSort2},
+	    </if>
+	    <if test="devSort2 == 'birth_year asc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) asc,
+	    </if>
+	    <if test="devSort2 == 'birth_year desc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) desc,
+	    </if>
+	    <if test="devSort2 == 'age asc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) asc,
+	    </if>
+	    <if test="devSort2 == 'age desc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) desc,
+	    </if>
+	    <if test="devSort2 == 'highest_edu asc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) asc,
+	    </if>
+	    <if test="devSort2 == 'highest_edu desc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) desc,
+	    </if>
+	    <if test="devSort2 == 'graduate_date asc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  asc,
+	    </if>
+	    <if test="devSort2 == 'graduate_date desc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  desc,
+	    </if>
+	    <if test="devSort3 == 'dName asc' or devSort3 == 'dName desc'
+	    			or devSort3 == 'jumin_num asc' or devSort3 == 'jumin_num desc'
+	    			or devSort3 == 'reg_date asc' or devSort3 == 'reg_date desc'">
+	        ${devSort3},
+	    </if>
+	    <if test="devSort3 == 'birth_year asc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) asc,
+	    </if>
+	    <if test="devSort3 == 'birth_year desc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) desc,
+	    </if>
+	    <if test="devSort3 == 'age asc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) asc,
+	    </if>
+	     <if test="devSort3 == 'age desc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) desc,
+	    </if>
+	    <if test="devSort3 == 'highest_edu asc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) asc,
+	    </if>
+	     <if test="devSort3 == 'highest_edu desc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) desc,
+	    </if>
+	    <if test="devSort3 == 'graduate_date asc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  asc,
+	    </if>
+	    <if test="devSort3 == 'graduate_date desc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  desc,
+	    </if>
+	    <if test="devSort4 == 'dName asc' or devSort4 == 'dName desc'
+	    			or devSort4 == 'jumin_num asc' or devSort4 == 'jumin_num desc'
+	    			or devSort4 == 'reg_date asc' or devSort4 == 'reg_date desc'">
+	        ${devSort4},
+	    </if>
+	    <if test="devSort4 == 'birth_year asc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) asc,
+	    </if>
+	    <if test="devSort4 == 'birth_year desc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) desc,
+	    </if>
+	    <if test="devSort4 == 'age asc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) asc,
+	    </if>
+	    <if test="devSort4 == 'age desc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) desc,
+	    </if>
+	    <if test="devSort4 == 'highest_edu asc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) asc,
+	    </if>
+	    <if test="devSort4 == 'highest_edu desc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) desc,
+	    </if>
+	    <if test="devSort4 == 'graduate_date asc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  asc,
+	    </if>
+	    <if test="devSort4 == 'graduate_date desc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  desc,
+	    </if>
+	    <if test="devSort5 == 'dName asc' or devSort5 == 'dName desc'
+	    			or devSort5 == 'jumin_num asc' or devSort5 == 'jumin_num desc'
+	    			or devSort5 == 'reg_date asc' or devSort5 == 'reg_date desc'">
+	        ${devSort5},
+	    </if>
+	    <if test="devSort5 == 'birth_year asc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) asc,
+	    </if>
+	    <if test="devSort5 == 'birth_year desc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) desc,
+	    </if>
+	    <if test="devSort5 == 'age asc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) asc,
+	    </if>
+	    <if test="devSort5 == 'age desc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) desc,
+	    </if>
+	    <if test="devSort5 == 'highest_edu asc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) asc,
+	    </if>
+	    <if test="devSort5 == 'highest_edu desc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) desc,
+	    </if>
+	    <if test="devSort5 == 'graduate_date asc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  asc,
+	    </if>
+	    <if test="devSort5 == 'graduate_date desc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  desc,
+	    </if>
+	    <if test="devSort6 == 'dName asc' or devSort6 == 'dName desc'
+	    			or devSort6 == 'jumin_num asc' or devSort6 == 'jumin_num desc'
+	    			or devSort6 == 'reg_date asc' or devSort6 == 'reg_date desc'">
+	        ${devSort6},
+	    </if>
+	    <if test="devSort6 == 'birth_year asc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) asc,
+	    </if>
+	    <if test="devSort6 == 'birth_year desc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) desc,
+	    </if>
+	    <if test="devSort6 == 'age asc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) asc,
+	    </if>
+	    <if test="devSort6 == 'age desc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) desc,
+	    </if>
+	    <if test="devSort6 == 'highest_edu asc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) asc,
+	    </if>
+	    <if test="devSort6 == 'highest_edu desc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) desc,
+	    </if>
+	    <if test="devSort6 == 'graduate_date asc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  asc,
+	    </if>
+	    <if test="devSort6 == 'graduate_date desc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  desc,
+	    </if>
+	    <if test="devSort7 == 'dName asc' or devSort7 == 'dName desc'
+	    			or devSort7 == 'jumin_num asc' or devSort7 == 'jumin_num desc'
+	    			or devSort7 == 'reg_date asc' or devSort7 == 'reg_date desc'">
+	        ${devSort7},
+	    </if>
+	    <if test="devSort7 == 'birth_year asc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) asc,
+	    </if>
+	    <if test="devSort7 == 'birth_year desc'">
+	    	(case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2)) desc,
+	    </if>
+	    <if test="devSort7 == 'age asc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) asc,
+	    </if>
+	    <if test="devSort7 == 'age desc'">
+	    	(to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1) desc,
+	    </if>
+	    <if test="devSort7 == 'highest_edu asc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) asc,
+	    </if>
+	    <if test="devSort7 == 'highest_edu desc'">
+	    	(CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN 1
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN 2
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN 3
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN 4
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN 5
+                END) desc,
+	    </if>
+	    <if test="devSort7 == 'graduate_date asc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  asc,
+	    </if>
+	    <if test="devSort7 == 'graduate_date desc'">
+	    	 (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)  desc,
+	    </if>
+			reg_date desc
+</sql>
+
+<sql id="devWhere">
+	<if test="is_retire!=null and is_retire.size()==1 and is_retire[0]==1"> 
+		and 
+		d.dev_num not in (select dr.dev_num FROM dev_retire_list dr) 
+	</if>
+	<if test="is_retire!=null and is_retire.size()==1 and is_retire[0]==2"> 
+		and 
+		d.dev_num in (select dr.dev_num FROM dev_retire_list dr)
+	</if>
+	<if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+               and(
+    </if>
+	
+	 <if test="keyword1!=null and keyword1.length()>0">
+		(((CASE
+	           WHEN D.DEV_NUM IN (SELECT di.dev_num FROM DOCTOR_INFO di) THEN '박사 졸업'
+	           WHEN D.DEV_NUM IN (SELECT mi.dev_num FROM MASTER_INFO mi) THEN '석사 졸업'
+	           WHEN D.DEV_NUM IN (SELECT ui.dev_num FROM UNIVERSITY_INFO ui) THEN '학사 졸업'
+	           WHEN D.DEV_NUM IN (SELECT ji.dev_num FROM JUNIORCOLLEGE_INFO ji) THEN '전문대 졸업'
+	           WHEN D.DEV_NUM IN (SELECT hi.dev_num FROM HIGHSCHOOL_INFO hi) THEN '고졸'
+	      END ) LIKE upper('%${keyword1}%'))
+        OR
+        upper(d.dname) LIKE upper('%${keyword1}%')
+        OR
+        upper(decode(substr(jumin_num, 7, 1), '1', '남', '3', '남', '여')) LIKE '%${keyword1}%'
+        OR
+        d.phone LIKE '%${keyword1}%'
+        OR
+        upper(d.email) LIKE upper('%${keyword1}%')
+        OR
+        d.jumin_num LIKE '%${keyword1}%'
+        OR
+        upper(address) LIKE upper('%${keyword1}%') 
+        OR
+		  EXISTS (
+		  SELECT 1
+		  FROM DEV_LICENSE dl
+		  WHERE dl.dev_num = d.dev_num
+		    AND dl.license_code IN ('1', '2')
+		    AND DECODE(dl.license_code, '1', '정보처리기사', '2', '정보처리산업기사') LIKE '%${keyword1}%'
+		))
+   </if>
+ 	<if test="(keyword1!=null and keyword1.length()>0) and (keyword2!=null and keyword2.length()>0)">
+    	${orand}
+    </if>
+   
+	<if test="keyword2!=null and keyword2.length()>0">
+	    (((CASE
+	           WHEN D.DEV_NUM IN (SELECT di.dev_num FROM DOCTOR_INFO di) THEN '박사 졸업'
+	           WHEN D.DEV_NUM IN (SELECT mi.dev_num FROM MASTER_INFO mi) THEN '석사 졸업'
+	           WHEN D.DEV_NUM IN (SELECT ui.dev_num FROM UNIVERSITY_INFO ui) THEN '학사 졸업'
+	           WHEN D.DEV_NUM IN (SELECT ji.dev_num FROM JUNIORCOLLEGE_INFO ji) THEN '전문대 졸업'
+	           WHEN D.DEV_NUM IN (SELECT hi.dev_num FROM HIGHSCHOOL_INFO hi) THEN '고졸'
+	       END ) LIKE upper('%${keyword2}%'))
+	        OR
+	       	   	 upper(d.dname) LIKE upper('%${keyword2}%')
+	        OR
+	       		 upper(decode(substr(jumin_num, 7, 1), '1', '남', '3', '남', '여')) LIKE '%${keyword2}%'
+	        OR
+	        	 d.phone LIKE '%${keyword2}%'
+	        OR
+	        	 upper(d.email) LIKE upper('%${keyword2}%')
+	        OR
+	        	 d.jumin_num LIKE '%${keyword2}%'
+	        OR
+	        	 upper(address) LIKE upper('%${keyword2}%')
+	        OR
+			  EXISTS (
+				  SELECT 1
+				  FROM DEV_LICENSE dl
+				  WHERE dl.dev_num = d.dev_num
+				  AND dl.license_code IN ('1', '2')
+				  AND DECODE(dl.license_code, '1', '정보처리기사', '2', '정보처리산업기사') LIKE '%${keyword2}%'
+			)
+		)
+   </if>
+   <if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+   	)
+   </if>
+         
+	<if test="hakbu!=null and hakbu.size()>0">
+	      <foreach collection="hakbu" item="tmp" open=" AND ( " close=" ) " separator=" or ">
+		      REGEXP_LIKE((
+		               SELECT HB.hakbu FROM
+		               (SELECT 
+		                     dno,
+		                     LISTAGG(hakbu, ', ')
+		                  WITHIN GROUP(ORDER BY hakbu) hakbu
+		                  FROM
+		                  (
+		                     SELECT DEV_NUM dno, DOCTOR_HAKBU as hakbu FROM DOCTOR_INFO DI UNION
+		                     SELECT DEV_NUM, MASTER_HAKBU as hakbu FROM MASTER_INFO MI UNION
+		                     SELECT DEV_NUM, UNIVERSITY_HAKBU as hakbu FROM UNIVERSITY_INFO UI UNION
+		                     SELECT DEV_NUM, JUNIORCOLLEGE_HAKBU as hakbu FROM JUNIORCOLLEGE_INFO JI
+		                  ) x
+		                  GROUP BY dno
+		               ) HB
+		                  WHERE d.DEV_NUM  = HB.dno
+		            ), '${tmp}') 
+	      </foreach>
+	  </if>
+	<if test="license!= null and license.size()>0">
+     	<foreach collection="license" item="tmp" open=" AND ( " close=" ) " separator=" or ">
+	         REGEXP_LIKE((
+	               SELECT DLC.license FROM
+	               (SELECT 
+	                     dno,
+	                     LISTAGG(license, ', ')
+	                  WITHIN GROUP(ORDER BY license) license
+	                  FROM
+	                  (
+	                     SELECT DEV_NUM dno, license_code as license FROM DEV_LICENSE DL  UNION
+	                     SELECT DEV_NUM, license_code FROM DEV_LICENSE DL
+	                  ) x
+	                  GROUP BY dno
+	               ) DLC
+	                  WHERE d.DEV_NUM  = DLC.dno
+	            ), '${tmp}') 
+            </foreach>
+	</if>
+         
+  	<if test="dispatch_role_code!=null and dispatch_role_code.size()>0">
+	    <foreach collection="dispatch_role_code" item="tmp" open="AND (" close=")" separator=" OR ">
+	        REGEXP_LIKE(
+	            (
+	                SELECT ROL.dispatch
+	                FROM (
+	                    SELECT
+	                        dno,
+	                        LISTAGG(dispatch, ', ') WITHIN GROUP (ORDER BY dispatch) AS dispatch
+	                    FROM (
+	                        SELECT DEV_NUM AS dno, DISPATCH_ROLE AS dispatch FROM DEV_PAST_PRJ_INFO DPPI
+	                        UNION
+	                        SELECT DEV_NUM, DISPATCH_ROLE FROM DEV_PAST_PRJ_INFO DPPI
+	                    ) x
+	                    GROUP BY dno
+	                ) ROL
+	                WHERE d.DEV_NUM = ROL.dno
+	            ),
+	            '${tmp}'
+	        )
+	    </foreach>
+	</if> 
+
+	<if test="highestLevel_edu!=null and highestLevel_edu.size()>0">
+	    <foreach collection="highestLevel_edu" item="tmp" open="AND (" close=")" separator=" OR ">
+		   d.dev_num IN (
+			    SELECT DEV_NUM
+			    FROM (
+			        SELECT
+			            DEV_NUM,
+			            CASE
+			                WHEN MAX("higestLevel_edu") = 1 THEN 1
+			                WHEN MAX("higestLevel_edu") = 2 THEN 2
+			                WHEN MAX("higestLevel_edu") = 3 THEN 3
+			                WHEN MAX("higestLevel_edu") = 4 THEN 4
+			                WHEN MAX("higestLevel_edu") = 5 THEN 5
+			                ELSE NULL
+			            END AS highestLevel_edu
+			        FROM (
+			            SELECT DEV_NUM, 1 AS "higestLevel_edu" FROM HIGHSCHOOL_INFO HI
+			            WHERE DEV_NUM = HI.DEV_NUM
+			            UNION
+			            SELECT DEV_NUM, 2 FROM JUNIORCOLLEGE_INFO JI
+			            WHERE DEV_NUM = JI.DEV_NUM
+			            UNION
+			            SELECT DEV_NUM, 3 FROM UNIVERSITY_INFO UI
+			            WHERE DEV_NUM = UI.DEV_NUM
+			            UNION
+			            SELECT DEV_NUM, 4 FROM MASTER_INFO MI
+			            WHERE DEV_NUM = MI.DEV_NUM
+			            UNION
+			            SELECT DEV_NUM, 5 FROM DOCTOR_INFO DI
+			            WHERE DEV_NUM = DI.DEV_NUM
+			        ) x
+			        GROUP BY DEV_NUM
+			    ) edu_priority
+			    WHERE REGEXP_LIKE(edu_priority.highestLevel_edu, #{tmp})
+			)
+	    </foreach>
+	</if>
+
+	<if test="birthday_start!=null and birthday_start.length()>0 and birthday_end!=null and birthday_end.length()>0">
+		AND
+			to_number(substr(jumin_num,3,2))
+			BETWEEN ${birthday_start} AND ${birthday_end}   
+	</if>   
+	<if test="birthday_start!=null and birthday_start.length()>0">
+        AND
+     		to_number(substr(jumin_num,3,2))
+	 	   >= ${birthday_start}      
+    </if>  
+     
+	<if test="age1!=null and age1.length()>0 and age2!=null and age2.length()>0">
+	    AND
+	    	TO_NUMBER(TO_CHAR(SYSDATE, 'YYYY')) -
+	        TO_NUMBER(
+	            CASE
+	                WHEN SUBSTR(jumin_num, 7, 1) IN ('1', '2') THEN '19' || SUBSTR(jumin_num, 1, 2)
+	                ELSE '20' || SUBSTR(jumin_num, 1, 2)
+	            END
+	        ) + 1 BETWEEN ${age1} AND ${age2}
+	</if>
+	 <if test="age1!=null and age1.length()>0 ">
+	      AND
+	    	TO_NUMBER(TO_CHAR(SYSDATE, 'YYYY')) -
+	        TO_NUMBER(
+	            CASE
+	                WHEN SUBSTR(jumin_num, 7, 1) IN ('1', '2') THEN '19' || SUBSTR(jumin_num, 1, 2)
+	                ELSE '20' || SUBSTR(jumin_num, 1, 2)
+	            END
+	        ) + 1 >= ${age1}
+	 </if>
+     
+    <if test="birth_year1!=null and birth_year1.length()>0 and birth_year2!=null and birth_year2.length()>0">
+       AND
+     	TO_NUMBER(
+	            CASE
+	                WHEN SUBSTR(jumin_num, 7, 1) IN ('1', '2') THEN '19' || SUBSTR(jumin_num, 1, 2)
+	                ELSE '20' || SUBSTR(jumin_num, 1, 2)
+	            END
+	        )
+	     BETWEEN ${birth_year1} AND ${birth_year2}
+   </if>
+   <if test="birth_year1!=null and birth_year1.length()>0">
+       AND
+     	TO_NUMBER(
+	            CASE
+	                WHEN SUBSTR(jumin_num, 7, 1) IN ('1', '2') THEN '19' || SUBSTR(jumin_num, 1, 2)
+	                ELSE '20' || SUBSTR(jumin_num, 1, 2)
+	            END
+	        )
+	     >= ${birth_year1}
+   </if>
+      
+     <if test="gender!= null and gender.size()!=2 and gender.size()==1 and gender[0]==1">
+         AND
+          ((SUBSTR(jumin_num, 7, 1) = 1) OR (SUBSTR(jumin_num, 7, 1) = 3))
+      </if>    
+      <if test="gender!= null and gender.size()!=2 and gender.size()==1 and gender[0]==2">
+         AND
+          ((SUBSTR(jumin_num, 7, 1) = 2) OR (SUBSTR(jumin_num, 7, 1) = 4))
+      </if>
+  
+	<if test="grad_year1 != null and grad_year1.length() > 0 and grad_year2 != null and grad_year2.length() > 0">
+		AND d.dev_num IN (
+		  SELECT 
+		    dev_num
+		  FROM (
+		    SELECT 
+		      dev_num,
+		      MAX(TO_NUMBER(TO_CHAR(GRA_DATE, 'yyyy'))) AS max_graduation_year
+		    FROM (
+		      SELECT dev_num, highschool_graduate_date AS GRA_DATE FROM highschool_info
+		          UNION ALL
+		      SELECT dev_num, juniorcollege_graduate_date FROM juniorcollege_info
+		          UNION ALL
+		      SELECT dev_num, university_graduate_date FROM university_info
+		          UNION ALL
+		      SELECT dev_num, master_graduate_date FROM master_info
+		          UNION ALL
+		      SELECT dev_num, doctor_graduate_date FROM doctor_info
+		    ) subquery
+		    GROUP BY dev_num
+		  ) graduation_info
+		  WHERE graduation_info.max_graduation_year BETWEEN ${grad_year1} AND ${grad_year2}
+		)
+	</if>
+	<if test="grad_year1 != null and grad_year1.length() > 0">
+		AND d.dev_num IN (
+		  SELECT 
+		    dev_num
+		  FROM (
+		    SELECT 
+		      dev_num,
+		      MAX(TO_NUMBER(TO_CHAR(GRA_DATE, 'yyyy'))) AS max_graduation_year
+		    FROM (
+		      SELECT dev_num, highschool_graduate_date AS GRA_DATE FROM highschool_info
+		          UNION ALL
+		      SELECT dev_num, juniorcollege_graduate_date FROM juniorcollege_info
+		          UNION ALL
+		      SELECT dev_num, university_graduate_date FROM university_info
+		          UNION ALL
+		      SELECT dev_num, master_graduate_date FROM master_info
+		          UNION ALL
+		      SELECT dev_num, doctor_graduate_date FROM doctor_info
+		    ) subquery
+		    GROUP BY dev_num
+		  ) graduation_info
+		  WHERE graduation_info.max_graduation_year >= ${grad_year1}
+		)
+	</if>
+  
+     <if test="can_reading_language!=null and can_reading_language.size()>0">
+    	 <foreach collection="can_reading_language" item="tmp" open="and (" close=")" separator=" or ">
+	         REGEXP_LIKE(
+	            (
+	                SELECT CRL.reading
+	                FROM (
+	                    SELECT
+	                        dno,
+	                        LISTAGG(reading, ', ') WITHIN GROUP (ORDER BY reading) AS reading
+	                    FROM (
+	                        SELECT DEV_NUM AS dno, CAN_READING_LANGUAGE AS reading FROM DEV_READING_LANGUAGE_INFO DRLI
+	                        UNION
+	                        SELECT DEV_NUM, CAN_READING_LANGUAGE FROM DEV_READING_LANGUAGE_INFO DRLI
+	                    ) x
+	                    GROUP BY dno
+	                ) CRL
+	                WHERE d.DEV_NUM = CRL.dno
+	            ),
+	            '${tmp}'
+	        )
+    	 </foreach>
+     </if>
+         
+     <if test="can_speaking_language!=null and can_speaking_language.size()>0">
+	     <foreach collection="can_speaking_language" item="tmp" open="and (" close=")" separator=" or "> 
+	              REGEXP_LIKE(
+	            (
+	                SELECT CSL.speaking
+	                FROM (
+	                    SELECT
+	                        dno,
+	                        LISTAGG(speaking, ', ') WITHIN GROUP (ORDER BY speaking) AS speaking
+	                    FROM (
+	                        SELECT DEV_NUM AS dno, CAN_SPEAKING_LANGUAGE AS speaking FROM DEV_SPEAKING_LANGUAGE_INFO DSLI
+	                        UNION
+	                        SELECT DEV_NUM, CAN_SPEAKING_LANGUAGE FROM DEV_SPEAKING_LANGUAGE_INFO DSLI
+	                    ) x
+	                    GROUP BY dno
+	                ) CSL
+	                WHERE d.DEV_NUM = CSL.dno
+	            ),
+	            '${tmp}'
+	        )
+	     </foreach>
+     </if> 
+     
+   <if test="soju1 != null and soju1.length() > 0 and soju2 != null and soju2.length() > 0">
+	    AND (
+	    (SELECT MAX(m.can_drink_soju)  
+	    FROM DEV_LIKING_INFO m
+	    WHERE m.dev_num = d.dev_num)  
+	    BETWEEN ${soju1} AND ${soju2}
+	    )
+	</if>
+	<if test="soju1 != null and soju1.length() > 0">
+	    AND (
+	    (SELECT MAX(m.can_drink_soju)  
+	    FROM DEV_LIKING_INFO m
+	    WHERE m.dev_num = d.dev_num)  
+	    >= ${soju1}
+	    )
+	</if>
+
+   <if test="beer1!=null and beer1.length()>0 and beer2!=null and beer2.length()>0">
+	    AND (
+	    (SELECT MAX(m.can_drink_beer)  
+	    FROM DEV_LIKING_INFO m
+	    WHERE m.dev_num = d.dev_num)  
+	    BETWEEN ${beer1} AND ${beer2}
+	    )
+   </if>
+   <if test="beer1!=null and beer1.length()>0">
+	    AND (
+	    (SELECT MAX(m.can_drink_beer)  
+	    FROM DEV_LIKING_INFO m
+	    WHERE m.dev_num = d.dev_num)  
+	    >= ${beer1}
+	    )
+   </if>
+   
+   <if test="go_army!=null and go_army.length()>0">  
+     	AND d.go_army = #{go_army}
+   </if>  
+     
+   <if test="dev_start_year != null and dev_start_year.length()>0 and dev_end_year != null and dev_end_year.length()>0">
+	   AND
+	   TO_NUMBER(TO_CHAR(sysdate,'YYYY')) - TO_NUMBER(TO_CHAR(reg_date,'YYYY')) BETWEEN ${dev_start_year} AND ${dev_end_year}
+   </if>
+   <if test="dev_start_year != null and dev_start_year.length()>0">
+	   AND
+	   TO_NUMBER(TO_CHAR(sysdate,'YYYY')) - TO_NUMBER(TO_CHAR(reg_date,'YYYY')) >= ${dev_start_year}
+   </if>
+   
+   <if test="(skill1 !=null and skill1.size()>0)
+	   or(skill2 !=null and skill2.size()>0)
+	   or(skill3!=null and skill3.size()>0)
+	   or(skill4 !=null and skill4.size()>0)
+	   or(skill5 !=null and skill5.size()>0)">
+	    AND (
+	    d.dev_num IN (
+    </if>
+    <if test="skill5 !=null and skill5.size()>0">
+        SELECT dev_num FROM dev_tool_info WHERE tool_code IN (
+	    <foreach collection="skill5" item="tmp1" separator=" , ">
+	    	${tmp1}
+	    </foreach>
+	    )
+    </if>
+    <if test="skill5 !=null and skill5.size()>0 and skill3 !=null and skill3.size()>0">
+        UNION
+    </if>
+    <if test="skill3 !=null and skill3.size()>0">
+        SELECT dev_num FROM dev_it_language_info WHERE it_language_code IN (
+	     <foreach collection="skill3" item="tmp2" separator=" , ">
+	    	${tmp2}
+	    </foreach>
+	    )
+    </if>
+    
+    <if test="((skill5 !=null and skill5.size()>0) or (skill3 !=null and skill3.size()>0)) and(skill1 !=null and skill1.size()>0)">
+        UNION
+    </if>
+    <if test="skill1 !=null and skill1.size()>0">
+        SELECT dev_num FROM dev_server_computer_info WHERE server_computer_code IN (
+	    <foreach collection="skill1" item="tmp3" separator=" , ">
+	    	${tmp3}
+	    </foreach>
+	    )
+    </if>
+    <if test="((skill5 !=null and skill5.size()>0) or (skill3 !=null and skill3.size()>0) or(skill1 !=null and skill1.size()>0)) and (skill2 !=null and skill2.size()>0)">
+        UNION
+    </if>
+    <if test="skill2 !=null and skill2.size()>0">
+        SELECT dev_num FROM dev_os_info WHERE os_code IN (
+	    <foreach collection="skill2" item="tmp4" separator=" , ">
+	    	${tmp4}
+	    </foreach>
+	    )
+    </if>
+    <if test="((skill5 !=null and skill5.size()>0) or (skill3 !=null and skill3.size()>0) or(skill1 !=null and skill1.size()>0) or (skill2 !=null and skill2.size()>0)) and (skill4 !=null and skill4.size()>0)">
+        UNION
+    </if>
+    
+    <if test="skill4 !=null and skill4.size()>0">
+        SELECT dev_num FROM dev_dbms_info WHERE dbms_code IN (
+	    <foreach collection="skill4" item="tmp5" separator=" , ">
+	    	${tmp5}
+	    </foreach>
+	  )
+  </if>
+  <if test="(skill1 !=null and skill1.size()>0)
+	   or(skill2 !=null and skill2.size()>0)
+	   or(skill3!=null and skill3.size()>0)
+	   or(skill4 !=null and skill4.size()>0)
+	   or(skill5 !=null and skill5.size()>0)">
+    	)
+	)
+  </if>
+</sql>
+
+	<select id="idCheckInfo" resultType="int">
+		select count(*) from dev_employee where ID=#{id}
+	</select>
+
+   <insert id="insertDevInfo" parameterType="com.naver.erp.DevDTO" >
+      insert  into dev_employee(
+         dev_num
+         ,ID
+         ,pwd
+         ,dName
+         ,jumin_num
+         ,phone
+         ,email
+         ,go_army
+         ,address
+         ,salary_bank
+         ,account_num
+         ) values (
+         (select 'D'||(nvl(max(to_number(substr(dev_num,2))),0)+1) from dev_employee)
+         ,#{id}
+         ,#{pwd}  
+         ,#{dName} 
+         ,#{jumin_num1}||#{jumin_num2}         
+         ,#{phone}
+         ,#{email}
+         ,#{go_army}
+         ,#{address}
+         ,#{salary_bank}
+         ,#{account_num}
+         )
+   </insert>
+   
+   <insert id="dev_emergency_line" parameterType="com.naver.erp.DevDTO" >
+      insert into dev_emergency_line (
+         dev_num
+         ,emergency_name
+         ,emergency_relation
+         ,emergency_phone
+      ) values( (select dev_num from dev_employee where id=#{id})
+         ,#{emergency_name}
+         ,#{emergency_relation}
+         ,#{emergency_phone}
+         )
+   </insert> 
+   
+   <insert id="highSchool_info" parameterType="com.naver.erp.DevDTO" >
+      insert into highSchool_info (
+         dev_num
+         ,highSchool_name
+         ,highSchool_graduate_date
+      ) values( (select dev_num from dev_employee where id=#{id})
+         ,#{highSchool_name}
+         ,to_date(#{highSchool_graduate_date},'YYYY-MM-DD')
+         )
+   </insert> 
+   
+   <insert id="juniorCollege_info" parameterType="com.naver.erp.DevDTO" >
+      insert into juniorCollege_info (
+         dev_num
+         ,juniorCollege_name
+         ,juniorCollege_hakbu
+         ,juniorCollege_graduate_date
+         ,major
+         <if test="juniorCollege_minor!=null and juniorCollege_minor.length()>0">
+         ,minor
+         </if>
+      ) values( (select dev_num from dev_employee where id=#{id})
+         ,#{juniorCollege_name}
+         ,#{juniorCollege_hakbu}
+         ,to_date(#{juniorCollege_graduate_date},'YYYY-MM-DD')
+         ,#{juniorCollege_major}
+         <if test="juniorCollege_minor!=null and juniorCollege_minor.length()>0">
+         ,#{juniorCollege_minor}
+         </if>
+         )
+   </insert>
+   
+   <insert id="university_info" parameterType="com.naver.erp.DevDTO" >
+      insert into university_info (
+         dev_num
+         ,university_name
+         ,university_hakbu
+         ,university_graduate_date
+         ,major
+         <if test="university_minor!=null and university_minor.length()>0">
+         ,minor
+         </if>
+      ) values( (select dev_num from dev_employee where id=#{id})
+         ,#{university_name}
+         ,#{university_hakbu}
+         ,to_date(#{university_graduate_date},'YYYY-MM-DD')
+         ,#{university_major}
+         <if test="university_minor!=null and university_minor.length()>0">
+         ,#{university_minor}
+         </if>
+         )
+   </insert>
+   
+   <insert id="master_info" parameterType="com.naver.erp.DevDTO" >
+      insert into master_info (
+         dev_num
+         ,master_name
+         ,master_hakbu
+         ,master_graduate_date
+         ,major
+         <if test="master_minor!=null and master_minor.length()>0">
+         ,minor
+         </if>
+      ) values( (select dev_num from dev_employee where id=#{id})
+         ,#{master_name}
+         ,#{master_hakbu}
+         ,to_date(#{master_graduate_date},'YYYY-MM-DD')
+         ,#{master_major}
+         <if test="master_minor!=null and master_minor.length()>0">
+         ,#{master_minor}
+         </if>
+         )
+   </insert>
+   
+   <insert id="doctor_info" parameterType="com.naver.erp.DevDTO" >
+      insert into doctor_info (
+         dev_num
+         ,doctor_name
+         ,doctor_hakbu
+         ,doctor_graduate_date
+         ,major
+         <if test="doctor_minor!=null and doctor_minor.length()>0">
+         ,minor
+         </if>
+      ) values( (select dev_num from dev_employee where id=#{id})
+         ,#{doctor_name}
+         ,#{doctor_hakbu}
+         ,to_date(#{doctor_graduate_date},'YYYY-MM-DD')
+         ,#{doctor_major}
+         <if test="doctor_minor!=null and doctor_minor.length()>0">
+         ,#{doctor_minor}
+         </if>
+         )
+   </insert>
+
+	<insert id="dev_family_info1" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_family_info (
+			dev_num
+			,relation
+			,family_name
+      ,family_job
+			,birth_year
+			,is_live_together
+	   )
+     <if test="family_relation1!=null and family_relation1.length()>0">
+      select (select dev_num from dev_employee where id=#{id})
+      ,#{family_relation1} 
+      ,#{family_name1}
+      ,#{family_job1}
+      ,#{family_birth_year1}
+      <if test="is_live_together1 != null and is_live_together1.length() > 0">
+        ,#{is_live_together1}
+     </if>
+     <if test="is_live_together1 == null or is_live_together1.length() == 0">
+      ,'비동거'
+     </if>
+      from dual
+     </if>
+	</insert>
+	<insert id="dev_family_info2" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_family_info (
+			dev_num
+			,relation
+			,family_name
+      ,family_job
+			,birth_year
+			,is_live_together
+	   )
+     <if test="family_relation2!=null and family_relation2.length()>0">
+      select (select dev_num from dev_employee where id=#{id})
+      ,#{family_relation2} 
+      ,#{family_name2}
+      ,#{family_job2}
+      ,#{family_birth_year2}
+      <if test="is_live_together2 != null and is_live_together2.length() > 0">
+        ,#{is_live_together2}
+     </if>
+     <if test="is_live_together2 == null or is_live_together2.length() == 0">
+      ,'비동거'
+     </if>
+      from dual
+     </if>
+	</insert>
+	<insert id="dev_family_info3" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_family_info (
+			dev_num
+			,relation
+			,family_name
+      ,family_job
+			,birth_year
+			,is_live_together
+	   )
+     <if test="family_relation3!=null and family_relation3.length()>0">
+      select (select dev_num from dev_employee where id=#{id})
+      ,#{family_relation3} 
+      ,#{family_name3}
+      ,#{family_job3}
+      ,#{family_birth_year3}
+      <if test="is_live_together3 != null and is_live_together3.length() > 0">
+        ,#{is_live_together3}
+     </if>
+     <if test="is_live_together3 == null or is_live_together3.length() == 0">
+      ,'비동거'
+     </if>
+      from dual
+     </if>
+	</insert>
+	<insert id="dev_family_info4" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_family_info (
+			dev_num
+			,relation
+			,family_name
+      ,family_job
+			,birth_year
+			,is_live_together
+	   )
+     <if test="family_relation4!=null and family_relation4.length()>0">
+      select (select dev_num from dev_employee where id=#{id})
+      ,#{family_relation4} 
+      ,#{family_name4}
+      ,#{family_job4}
+      ,#{family_birth_year4}
+      <if test="is_live_together4 != null and is_live_together4.length() > 0">
+        ,#{is_live_together4}
+     </if>
+     <if test="is_live_together4 == null or is_live_together4.length() == 0">
+      ,'비동거'
+     </if>
+      from dual
+     </if>
+	</insert>
+	<insert id="dev_family_info5" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_family_info (
+			dev_num
+			,relation
+			,family_name
+      ,family_job
+			,birth_year
+			,is_live_together
+	   )
+     <if test="family_relation5!=null and family_relation5.length()>0">
+      select (select dev_num from dev_employee where id=#{id})
+      ,#{family_relation5} 
+      ,#{family_name5}
+      ,#{family_job5}
+      ,#{family_birth_year5}
+      <if test="is_live_together5 != null and is_live_together5.length() > 0">
+        ,#{is_live_together5}
+     </if>
+     <if test="is_live_together5 == null or is_live_together5.length() == 0">
+      ,'비동거'
+     </if>
+      from dual
+     </if>
+	</insert>
+   
+	<insert id="past_company_info" parameterType="com.naver.erp.DevDTO" >
+		insert into past_company_info (
+			dev_num
+			,company_name
+			,duty
+			,part
+			,dep
+			,position
+			,hire_type
+			,salary
+			,hired_date
+			,resign_date
+	   )
+	   <if test="salary1!=null and salary1.length()>0 ">
+       select (select dev_num from dev_employee where id=#{id})
+			,#{past_company_name1}
+			,#{duty1}
+			,#{part1}
+			,#{dep1}
+			,#{position1}
+			,#{hire_type1}
+			,${salary1}
+			,to_date(#{hired_date1},'YYYY-MM')
+			,to_date(#{resign_date1},'YYYY-MM')
+       from dual
+  </if>
+	</insert>
+
+   <insert id="dev_license" parameterType="com.naver.erp.DevDTO" >
+      INSERT INTO dev_license (
+           dev_num
+           ,license_code
+       )
+      <foreach item="tmp1" collection="license" separator=" UNION ALL ">
+         SELECT(select dev_num from dev_employee where id=#{id})
+         ,#{tmp1} FROM DUAL
+      </foreach>
+   </insert> 
+
+   <insert id="dev_reading_language_info" parameterType="com.naver.erp.DevDTO" >
+      INSERT INTO dev_reading_language_info (
+           dev_num
+           ,can_reading_language
+       )
+      <foreach item="tmp2" collection="can_reading_language" separator=" UNION ALL ">
+         SELECT(select dev_num from dev_employee where id=#{id})
+         ,#{tmp2} FROM DUAL
+      </foreach>
+   </insert> 
+   
+   <insert id="dev_speaking_language_info" parameterType="com.naver.erp.DevDTO" >
+      INSERT INTO dev_speaking_language_info (
+           dev_num
+           ,can_speaking_language
+       )
+      <foreach item="tmp3" collection="can_speaking_language" separator=" UNION ALL ">
+         SELECT(select dev_num from dev_employee where id=#{id})
+         ,#{tmp3} FROM DUAL
+      </foreach>
+   </insert> 
+
+   <insert id="itCenter_info" parameterType="com.naver.erp.DevDTO" >
+      INSERT INTO itCenter_info (
+           dev_num
+           ,itCenter_name
+         ,edu_period
+         ,eduFinish_date
+         ,eduFinish_subject
+      ) values(
+         (select dev_num from dev_employee where id=#{id})
+         ,#{itCenter_name}
+         ,#{edu_period}
+         ,to_date(#{eduFinish_date},'YYYY-MM-DD')
+         ,#{eduFinish_subject}
+         )
+   </insert> 
+   
+   <insert id="dev_liking_info" parameterType="com.naver.erp.DevDTO" >
+      INSERT INTO dev_liking_info (
+           dev_num
+           ,day_smoking
+         ,can_drink_soju
+         ,can_drink_beer
+      ) values(
+         (select dev_num from dev_employee where id=#{id})
+         ,#{smoke}
+         ,#{soju}
+         ,#{beer}
+         )
+   </insert> 
+   <insert id="dev_interest_info" parameterType="com.naver.erp.DevDTO" >
+      INSERT INTO dev_interest_info (
+           dev_num
+           ,interest_code
+       )
+      <foreach item="tmp9" collection="interest" separator=" UNION ALL ">
+         SELECT(select dev_num from dev_employee where id=#{id})
+         ,#{tmp9} FROM DUAL
+      </foreach>
+   </insert> 
+   
+	<insert id="dev_past_prj_info" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_past_prj_info (
+	        dev_num
+			,past_prj_name
+	        ,prj_start_date
+			,prj_finish_date
+			,dispatch_level
+			,client_company_name
+			,work_company_name
+			,dispatch_role
+	   )
+       select (select dev_num from dev_employee where id=#{id})
+			,#{past_prj_name}
+			,to_date(#{prj_start_date},'yyyy-mm')
+			,to_date(#{prj_finish_date},'yyyy-mm')
+			,#{dispatch_level}
+			,#{client_company_name}
+			,#{work_company_name}
+			,#{dispatch_role}
+       from dual
+       </insert>
+		<insert id="dev_server_computer_info" parameterType="com.naver.erp.DevDTO" >
+      insert into dev_server_computer_info (
+            dev_num
+            ,server_computer_code
+        )
+	   <if test="server_computer1!=null and server_computer1.size()>0 ">
+      <foreach item="tmp20" collection="server_computer1" separator=" union all ">
+        select (select dev_num from dev_employee where id=#{id})
+        ,#{tmp20} from dual
+      </foreach>
+		</if>
+	</insert> 
+	
+	
+	<insert id="dev_OS_info" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_OS_info (
+	        dev_num
+	        ,OS_code
+	    )
+      <if test="OS1!=null and OS1.size()>0 ">
+		<foreach item="tmp25" collection="OS1" separator=" union all ">
+			select (select dev_num from dev_employee where id=#{id})
+			,#{tmp25} from dual
+		</foreach>
+		</if>
+	</insert> 
+	
+	
+	<insert id="dev_it_language_info" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_it_language_info (
+	        dev_num
+	        ,it_language_code
+	    )
+      <if test="it_language1!=null and it_language1.size()>0 ">
+		<foreach item="tmp30" collection="it_language1" separator=" union all ">
+			select (select dev_num from dev_employee where id=#{id})
+			,#{tmp30} from dual
+		</foreach>
+		</if>
+	</insert> 
+	
+	
+	<insert id="dev_DBMS_info" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_DBMS_info (
+	        dev_num
+	        ,DBMS_code
+	    )
+      <if test="DBMS1!=null and DBMS1.size()>0 ">
+		<foreach item="tmp35" collection="DBMS1" separator=" union all ">
+			select (select dev_num from dev_employee where id=#{id})
+			,#{tmp35} from dual
+		</foreach>
+	</if>
+	</insert> 
+	
+	<insert id="dev_tool_info" parameterType="com.naver.erp.DevDTO" >
+		insert into dev_tool_info (
+	        dev_num
+	        ,tool_code
+	    )
+      <if test="tool1!=null and tool1.size()>0 ">
+		<foreach item="tmp40" collection="tool1" separator=" union all ">
+			select (select dev_num from dev_employee where id=#{id})
+			,#{tmp40} from dual
+		</foreach>
+		</if>
+	</insert> 
+ 
+	<select id="getDevListCntAll" resultType="int">
+      select count(*) from dev_employee 
+   </select>
+   <select id="getDevListCnt" parameterType="com.naver.erp.DevSearchDTO" resultType="int">
+      select count(*) from dev_employee d where
+         1=1
+    <include refid="devWhere"/>
+         
+   </select>
+   <select id="getDevList" parameterType="com.naver.erp.DevSearchDTO" resultType="java.util.HashMap">
+      select * from( select rownum RNUM, zxcvb.* from(
+      select
+      		d.dev_num "dev_num"
+             ,dname                                                           "dName"
+             , (decode(substr(jumin_num, 7, 1), '1', '남', '3', '남', '여'))       "gender"
+             , (case
+                 substr(jumin_num, 7, 1)
+             when '1' then '19'
+             when '2' then '19'
+             else '20'
+                 end||substr(jumin_num, 1, 2))                         "birth_year"
+             , (to_number(to_char(sysdate, 'YYYY'))
+               -
+                 to_number(
+               case
+               substr(jumin_num,7,1)
+               when '1' then '19'
+               when '2' then '19'
+               else '20'
+               end||substr(jumin_num,1,2) ) +1)                               "age"
+             , phone                                                       "phone"
+             , email                                                            "email"
+             , (substr(jumin_num, 1, 6)||'-'||substr(jumin_num, 7, 7))            "jumin_num"
+             , (substr(address, 1, 10)||'…')                                     "abode"
+              , (CASE 
+                WHEN (D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI WHERE D.DEV_NUM = DI.DEV_NUM)) THEN '박사 졸업' 
+                WHEN (D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI WHERE D.DEV_NUM = MI.DEV_NUM)) THEN '석사 졸업' 
+                WHEN (D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI WHERE D.DEV_NUM = UI.DEV_NUM)) THEN '학사 졸업'
+                WHEN (D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI WHERE D.DEV_NUM = JI.DEV_NUM)) THEN '전문대 졸업'
+                WHEN (D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI WHERE D.DEV_NUM = HI.DEV_NUM)) THEN '고졸'
+                END)                                              "highest_edu"
+                , (CASE
+                  WHEN D.DEV_NUM IN (SELECT DI.DEV_NUM FROM DOCTOR_INFO DI) THEN (SELECT UNIQUE  TO_CHAR(DI.DOCTOR_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM DOCTOR_INFO DI WHERE DI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT MI.DEV_NUM FROM MASTER_INFO MI) THEN (SELECT UNIQUE TO_CHAR(MI.MASTER_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM MASTER_INFO MI WHERE MI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT UI.DEV_NUM FROM UNIVERSITY_INFO UI) THEN (SELECT UNIQUE TO_CHAR(UI.UNIVERSITY_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM UNIVERSITY_INFO UI WHERE UI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT JI.DEV_NUM FROM JUNIORCOLLEGE_INFO JI) THEN (SELECT UNIQUE TO_CHAR(JI.JUNIORCOLLEGE_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM JUNIORCOLLEGE_INFO JI WHERE JI.DEV_NUM = D.DEV_NUM)
+                WHEN D.DEV_NUM IN (SELECT HI.DEV_NUM FROM HIGHSCHOOL_INFO HI) THEN (SELECT UNIQUE TO_CHAR(HI.HIGHSCHOOL_GRADUATE_DATE,'YYYY"년 "MM"월"') FROM HIGHSCHOOL_INFO HI WHERE HI.DEV_NUM = D.DEV_NUM)
+                 END)                                              "graduate_date"
+             , TO_CHAR(REG_DATE, 'YYYY"년" MM"월" DD"일"')                   "hire_date"
+             , NVL(( SELECT DLC.LICENSE_CODE FROM
+               (SELECT 
+                  DEV_NUM,
+                  LISTAGG(decode(LICENSE_CODE, '1', '정보처리기사', '2', '정보처리산업기사'), ',' )
+                    WITHIN GROUP(ORDER BY license_code) license_code
+                   FROM
+                     (SELECT dev_num, license_code FROM DEV_LICENSE dl UNION
+                      SELECT dev_num, license_code FROM DEV_LICENSE dl) x
+                   GROUP BY dev_num
+               ) dlc
+               WHERE d.dev_num = dlc.dev_num), '없음')                        "license"
+            ,  sl.have_skill_list   "skill"
+            , (case 
+			        when exists (select 1 from dev_retire_list dr WHERE d.dev_num = dr.dev_num) then '퇴사자'
+			        else '근무자'
+			   end) "is_retire"	
+             
+             from dev_employee d 
+             
+             left outer JOIN (
+				  SELECT
+				    skill_list.dev_num,
+				    LISTAGG(have_skill, ',') WITHIN GROUP (ORDER BY skill_list.dev_num) AS have_skill_list
+				  FROM (
+				    SELECT dt.dev_num, ct.tool_name AS have_skill
+				    FROM dev_tool_info dt
+				    JOIN code_tool ct ON dt.tool_code = ct.tool_code
+				    UNION ALL
+				    SELECT dil.dev_num, cil.it_language_name AS have_skill
+				    FROM dev_it_language_info dil
+				    JOIN code_it_language cil ON dil.it_language_code = cil.it_language_code
+				    UNION ALL
+				    SELECT dsc.dev_num, csc.server_computer_name AS have_skill
+				    FROM dev_server_computer_info dsc
+				    JOIN code_server_computer csc ON dsc.server_computer_code = csc.server_computer_code
+				    UNION ALL
+				    SELECT doi.dev_num, co.os_name AS have_skill
+				    FROM dev_os_info doi
+				    JOIN code_os co ON doi.os_code = co.os_code
+				    UNION ALL
+				    SELECT ddi.dev_num, cd.dbms_name AS have_skill
+				    FROM dev_dbms_info ddi
+				    JOIN code_dbms cd ON ddi.dbms_code = cd.dbms_code
+				  ) skill_list
+				  GROUP BY skill_list.dev_num
+				) sl ON d.dev_num = sl.dev_num
+             
+             where 1=1      
+             <include refid="devWhere"/>
+			 <include refid="devSort"/> 
+             <![CDATA[
+                ) zxcvb) where RNUM>=#{begin_rowNo} and RNUM<=#{end_rowNo}
+             ]]>
+   </select>
+	
+	<select id="getDevDetailInfo" parameterType="com.naver.erp.DevSearchDTO" resultType="java.util.HashMap">
+		select
+        (case 
+            when exists (select 1 from dev_retire_list dr WHERE d.dev_num = dr.dev_num) then '퇴사자'
+            else '근무자'
+        end) "is_retire",
+         id "id",
+         pwd "pwd",
+         dName "dName",
+         substr(jumin_num,1,6) "jumin_num1",
+         substr(jumin_num,7,7) "jumin_num2",
+         phone "phone",
+         email "email",
+         go_army "go_army",
+         address "address",
+         (select emergency_name from dev_emergency_line de where d.dev_num = de.dev_num) "emergency_name",
+         (select emergency_relation from dev_emergency_line de where d.dev_num = de.dev_num) "emergency_relation",
+         (select emergency_phone from dev_emergency_line de where d.dev_num = de.dev_num) "emergency_phone",
+         salary_bank "salary_bank",
+         account_num "account_num",
+         (select highschool_name from highschool_info h where d.dev_num = h.dev_num) "highschool_name",
+         to_char((select highschool_graduate_date from highschool_info h where d.dev_num = h.dev_num), 'yyyy-mm-dd') "highSchool_graduate_date",
+         (select juniorcollege_name from juniorcollege_info j where d.dev_num = j.dev_num) "juniorCollege_name",
+         (select juniorcollege_hakbu from juniorcollege_info j where d.dev_num = j.dev_num) "juniorcollege_hakbu",
+         to_char((select juniorcollege_graduate_date from juniorcollege_info j where d.dev_num = j.dev_num), 'yyyy-mm-dd') "juniorCollege_graduate_date",
+         (select major from juniorcollege_info j where d.dev_num = j.dev_num) "juniorCollege_major",
+         (select minor from juniorcollege_info j where d.dev_num = j.dev_num) "juniorCollege_minor",
+         (select university_name from university_info u where d.dev_num = u.dev_num) "university_name",
+         (select university_hakbu from university_info u where d.dev_num = u.dev_num) "university_hakbu",
+         to_char((select university_graduate_date from university_info u where d.dev_num = u.dev_num), 'yyyy-mm-dd') "university_graduate_date",
+         (select major from university_info u where d.dev_num = u.dev_num) "university_major",
+         (select minor from university_info u where d.dev_num = u.dev_num) "university_minor",
+         (select master_name from master_info m where d.dev_num = m.dev_num) "master_name",
+         (select master_hakbu from master_info m where d.dev_num = m.dev_num) "master_hakbu",
+         to_char((select master_graduate_date from master_info m where d.dev_num = m.dev_num), 'yyyy-mm-dd') "master_graduate_date",
+         (select major from master_info m where d.dev_num = m.dev_num) "master_major",
+         (select minor from master_info m where d.dev_num = m.dev_num) "master_minor",
+         (select doctor_name from doctor_info doc where d.dev_num = doc.dev_num) "doctor_name",
+         (select doctor_hakbu from doctor_info doc where d.dev_num = doc.dev_num) "doctor_hakbu",
+         to_char((select doctor_graduate_date from doctor_info doc where d.dev_num = doc.dev_num), 'yyyy-mm-dd') "doctor_graduate_date",
+         (select major from doctor_info doc where d.dev_num = doc.dev_num) "doctor_major",
+         (select minor from doctor_info doc where d.dev_num = doc.dev_num) "doctor_minor",
+         
+		    (SELECT LISTAGG(relation, ',') WITHIN GROUP (ORDER BY family_order)
+			     FROM (
+			         SELECT relation, ROW_NUMBER() OVER (ORDER BY dev_num) AS family_order
+			          FROM dev_family_info dfi
+              WHERE dfi.dev_num = '${dev_uid}' 
+
+			     )
+			    ) AS family_relation, 
+		    
+		    (SELECT LISTAGG(family_name, ',') WITHIN GROUP (ORDER BY family_order)
+			     FROM (
+			         SELECT family_name, ROW_NUMBER() OVER (ORDER BY dev_num) AS family_order
+			          FROM dev_family_info dfi
+              WHERE dfi.dev_num = '${dev_uid}' 
+
+			     )
+			 ) AS family_name, 
+			 
+		    (SELECT LISTAGG(family_job, ',') WITHIN GROUP (ORDER BY family_order)
+			     FROM (
+			         SELECT family_job, ROW_NUMBER() OVER (ORDER BY dev_num) AS family_order
+			          FROM dev_family_info dfi
+              WHERE dfi.dev_num = '${dev_uid}' 
+
+			     )
+			    ) AS family_job, 
+		    
+		    (SELECT LISTAGG(birth_year, ',') WITHIN GROUP (ORDER BY family_order)
+		     FROM (
+		         SELECT birth_year, ROW_NUMBER() OVER (ORDER BY dev_num) AS family_order
+		          FROM dev_family_info dfi
+              WHERE dfi.dev_num = '${dev_uid}' 
+
+		     )
+		    ) AS family_birth_year, 
+		    
+		    (SELECT LISTAGG(is_live_together, ',') WITHIN GROUP (ORDER BY live_together_order)
+		     FROM (
+		         SELECT is_live_together, ROW_NUMBER() OVER (ORDER BY dev_num) AS live_together_order
+		          FROM dev_family_info dfi
+              WHERE dfi.dev_num = '${dev_uid}' 
+
+		     )
+		    ) AS is_live_together,
+         
+         
+         
+         
+         (select day_smoking from dev_liking_info dl where d.dev_num = dl.dev_num) "smoke",
+         (select can_drink_soju from dev_liking_info dl where d.dev_num = dl.dev_num) "soju",
+         (select can_drink_beer from dev_liking_info dl where d.dev_num = dl.dev_num) "beer",
+         (select company_name from past_company_info pc where d.dev_num = pc.dev_num) "past_company_name",
+         (select duty from past_company_info pc where d.dev_num = pc.dev_num) "duty",
+         (select part from past_company_info pc where d.dev_num = pc.dev_num) "part",
+         (select dep from past_company_info pc where d.dev_num = pc.dev_num) "dep",
+         (select position from past_company_info pc where d.dev_num = pc.dev_num) "position",
+         (select hire_type from past_company_info pc where d.dev_num = pc.dev_num) "hire_type",
+         (select salary from past_company_info pc where d.dev_num = pc.dev_num) "salary",
+         to_char((select hired_date from past_company_info pc where d.dev_num = pc.dev_num), 'yyyy-mm') "hired_date",
+         to_char((select resign_date from past_company_info pc where d.dev_num = pc.dev_num), 'yyyy-mm') "resign_date",
+         (
+           SELECT li.interest FROM
+            (SELECT
+              x.dno,
+              LISTAGG(interest, ', ')
+              WITHIN GROUP(ORDER BY interest) interest
+              FROM
+               (
+                 SELECT DEV_NUM dno, interest_code as interest FROM dev_interest_info UNION
+                 SELECT DEV_NUM, interest_code FROM dev_interest_info
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "interest",
+         (
+           SELECT li.license FROM
+            (SELECT
+              x.dno,
+              LISTAGG(license, ', ')
+              WITHIN GROUP(ORDER BY license) license
+              FROM
+               (
+                 SELECT DEV_NUM dno, license_code as license FROM DEV_LICENSE UNION
+                 SELECT DEV_NUM, license_code FROM DEV_LICENSE
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "license",
+         (
+           SELECT li.reading_language FROM
+            (SELECT
+              x.dno,
+              LISTAGG(reading_language, ', ')
+              WITHIN GROUP(ORDER BY reading_language) reading_language
+              FROM
+               (
+                 SELECT DEV_NUM dno, can_reading_language as reading_language FROM dev_reading_language_info UNION
+                 SELECT DEV_NUM, can_reading_language FROM dev_reading_language_info
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "reading_language",
+         (
+           SELECT li.speaking_language FROM
+            (SELECT
+              x.dno,
+              LISTAGG(speaking_language, ', ')
+              WITHIN GROUP(ORDER BY speaking_language) speaking_language
+              FROM
+               (
+                 SELECT DEV_NUM dno, can_speaking_language as speaking_language FROM dev_speaking_language_info UNION
+                 SELECT DEV_NUM, can_speaking_language FROM dev_speaking_language_info
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "speaking_language",
+         (select itcenter_name from itcenter_info it where d.dev_num = it.dev_num) "itCenter_name",
+         (select edu_period from itcenter_info it where d.dev_num = it.dev_num) "edu_period",
+         to_char((select edufinish_date from itcenter_info it where d.dev_num = it.dev_num), 'yyyy-mm-dd') "eduFinish_date",
+         (select edufinish_subject from itcenter_info it where d.dev_num = it.dev_num) "eduFinish_subject",
+         (select past_prj_name from dev_past_prj_info dp where d.dev_num = dp.dev_num) "dev_past_prj_name",
+         to_char((select prj_start_date from dev_past_prj_info dp where d.dev_num = dp.dev_num), 'yyyy-mm') "prj_start_date",
+         to_char((select prj_finish_date from dev_past_prj_info dp where d.dev_num = dp.dev_num), 'yyyy-mm') "dev_past_prj_finish_date",
+         (select dispatch_level from dev_past_prj_info dp where d.dev_num = dp.dev_num) "dev_past_dispatch_level",
+         (select client_company_name from dev_past_prj_info dp where d.dev_num = dp.dev_num) "dev_past_client_company_name",
+         (select work_company_name from dev_past_prj_info dp where d.dev_num = dp.dev_num) "dev_past_work_company_name",
+         (select dispatch_role from dev_past_prj_info dp where d.dev_num = dp.dev_num) "dev_past_work_dispatch_role",
+         (
+           SELECT li.server_computer FROM
+            (SELECT
+              x.dno,
+              LISTAGG(server_computer, ', ')
+              WITHIN GROUP(ORDER BY server_computer) server_computer
+              FROM
+               (
+                 SELECT DEV_NUM dno, server_computer_code as server_computer FROM dev_server_computer_info UNION
+                 SELECT DEV_NUM, server_computer_code FROM dev_server_computer_info
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "server_computer",
+         (
+           SELECT li.os FROM
+            (SELECT
+              x.dno,
+              LISTAGG(os, ', ')
+              WITHIN GROUP(ORDER BY os) os
+              FROM
+               (
+                 SELECT DEV_NUM dno, os_code as os FROM dev_os_info UNION
+                 SELECT DEV_NUM, os_code FROM dev_os_info
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "os",
+         (
+           SELECT li.it_language FROM
+            (SELECT
+              x.dno,
+              LISTAGG(it_language, ', ')
+              WITHIN GROUP(ORDER BY it_language) it_language
+              FROM
+               (
+                 SELECT DEV_NUM dno, it_language_code as it_language FROM dev_it_language_info UNION
+                 SELECT DEV_NUM, it_language_code FROM dev_it_language_info
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "it_language",
+         (
+           SELECT li.dbms  FROM
+            (SELECT
+              x.dno,
+              LISTAGG(dbms, ', ')
+              WITHIN GROUP(ORDER BY dbms) dbms
+              FROM
+               (
+                 SELECT DEV_NUM dno, dbms_code as dbms FROM dev_dbms_info UNION
+                 SELECT DEV_NUM, dbms_code FROM dev_dbms_info
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "dbms",
+         (
+           SELECT li.tool FROM
+            (SELECT
+              x.dno,
+              LISTAGG(tool, ', ')
+              WITHIN GROUP(ORDER BY tool) tool
+              FROM
+               (
+                 SELECT DEV_NUM dno, tool_code as tool FROM dev_tool_info UNION
+                 SELECT DEV_NUM, tool_code FROM dev_tool_info
+               ) x
+               GROUP BY dno
+               ) li
+              WHERE d.dev_num = li.dno
+            ) "tool"
+
+            from
+                dev_employee d
+            where
+               d.dev_num='${dev_uid}'      
+   </select>
+   
+     
+<insert id="deleteDevInfo" parameterType="com.naver.erp.DevDTO">
+	insert into dev_retire_list( 
+		dev_num
+	) values(
+		'D${del_dev_uid}' 
+	)
+</insert>
+<delete id="delete_dev_emergency_line" parameterType="com.naver.erp.DevDTO">
+	delete from dev_emergency_line where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_highSchool_info" parameterType="com.naver.erp.DevDTO">
+	delete from highSchool_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_juniorCollege_info" parameterType="com.naver.erp.DevDTO">
+	delete from juniorCollege_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_university_info" parameterType="com.naver.erp.DevDTO">
+	delete from university_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_master_info" parameterType="com.naver.erp.DevDTO">
+	delete from master_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_doctor_info" parameterType="com.naver.erp.DevDTO">
+	delete from doctor_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_past_company_info" parameterType="com.naver.erp.DevDTO">
+	delete from past_company_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_family_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_family_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_license" parameterType="com.naver.erp.DevDTO">
+	delete from dev_license where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_reading_language_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_reading_language_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_speaking_language_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_speaking_language_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_itCenter_info" parameterType="com.naver.erp.DevDTO">
+	delete from itCenter_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_liking_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_liking_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_past_prj_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_past_prj_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_server_computer_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_server_computer_info where dev_num = 'D${del_dev_uid}'
+</delete>
+<delete id="delete_dev_OS_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_OS_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_it_language_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_it_language_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_DBMS_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_DBMS_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_dev_tool_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_tool_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+<delete id="delete_interest_info" parameterType="com.naver.erp.DevDTO">
+	delete from dev_interest_info where dev_num = 'D${del_dev_uid}' 
+</delete>
+
+<update id="updateDevInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         dev_employee
+      set
+            pwd = #{pwd},
+            dName = #{dName},
+            phone = #{phone},
+        	jumin_num = #{jumin_num1}||#{jumin_num2}, 
+            email = #{email},
+            go_army = #{go_army},
+            address = #{address},
+            salary_bank = #{salary_bank},
+            account_num = #{account_num}
+       where
+           dev_num = 'D${del_dev_uid}'
+</update>
+   
+<update id="updateDevEmergencyInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         dev_emergency_line
+      set         
+         <if test="emergency_name!=null and emergency_name.length()>0">
+         emergency_name = #{emergency_name}
+         </if>
+         <if test="emergency_name.length()==0">
+            emergency_name = #{emergency_name}
+         </if>
+            ,emergency_relation = #{emergency_relation}
+            ,emergency_phone = #{emergency_phone}
+         
+       where
+           dev_num = 'D${del_dev_uid}'
+</update>  
+
+<update id="updateDevLikingInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         dev_liking_info
+      set
+          day_smoking = #{smoke},
+          can_drink_soju = #{soju},
+          can_drink_beer = #{beer}
+       where
+           dev_num = 'D${del_dev_uid}'
+</update>    
+   
+
+<update id="updateDevItcenterInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         itcenter_info
+      set
+          itcenter_name = #{itCenter_name},
+            edu_period = #{edu_period},
+            edufinish_date = #{eduFinish_date},
+            edufinish_subject = #{eduFinish_subject}
+       where
+           dev_num = 'D${del_dev_uid}'
+</update>
+
+
+   <update id="updateDevPastCompanyInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         past_company_info
+      set
+          company_name = #{past_company_name1},
+            duty = #{duty1},
+            part = #{part1},
+            dep = #{dep1},
+            position = #{position1},
+            hire_type = #{hire_type1},
+            salary = #{salary1},
+            hired_date = to_date(#{hired_date1},'YYYY-MM'),
+            resign_date = to_date(#{resign_date1},'YYYY-MM')
+       where
+           dev_num = 'D${del_dev_uid}'
+   </update>
+
+<update id="updateDevHighschoolInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         highschool_info
+      set
+          highschool_name = #{highSchool_name},
+            highschool_graduate_date = #{highSchool_graduate_date}
+       where
+           dev_num = 'D${del_dev_uid}'
+   </update>
+
+<update id="updateDevjuniorcollegeInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         juniorcollege_info
+      set
+          juniorcollege_name = #{juniorCollege_name},
+          juniorcollege_hakbu = #{juniorCollege_hakbu},
+            juniorcollege_graduate_date = #{juniorCollege_graduate_date},
+            major = #{juniorCollege_major},
+            minor = #{juniorCollege_minor}
+       where
+           dev_num = 'D${del_dev_uid}'
+   </update>
+  
+    <update id="updateDevUniversityInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         university_info
+      set
+          university_name = #{university_name},
+          university_hakbu = #{university_hakbu},
+            university_graduate_date = #{university_graduate_date},
+            major = #{university_major},
+            minor = #{university_minor}
+       where
+           dev_num = 'D${del_dev_uid}'
+   </update>  
+  
+  <update id="updateDevMasterInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         master_info
+      set
+          master_name = #{master_name},
+          master_hakbu = #{master_hakbu},
+            master_graduate_date = #{master_graduate_date},
+            major = #{master_major},
+            minor = #{master_minor}
+       where
+           dev_num = 'D${del_dev_uid}'
+   </update>
+   
+   
+   <update id="updateDevDoctorInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         doctor_info
+      set
+          doctor_name = #{doctor_name},
+          doctor_hakbu = #{doctor_hakbu},
+            doctor_graduate_date = #{doctor_graduate_date},
+            major = #{doctor_major},
+            minor = #{doctor_minor}
+       where
+           dev_num = 'D${del_dev_uid}'
+   </update>   
+   
+
+
+<update id="updateDevPastPrjInfo" parameterType="com.naver.erp.DevDTO">
+      update
+         dev_past_prj_info
+      set
+          past_prj_name = #{past_prj_name},
+          prj_start_date = to_date(#{prj_start_date}, 'yyyy-mm'),
+          prj_finish_date = to_date(#{prj_finish_date}, 'yyyy-mm'),
+          dispatch_level = #{dispatch_level},
+          client_company_name = #{client_company_name},
+          work_company_name = #{work_company_name},
+          dispatch_role = #{dispatch_role}
+       where
+           dev_num =  'D${del_dev_uid}'
+</update>
+   
+</mapper>

@@ -1,0 +1,711 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.naver.erp.FreelancerDAO">
+
+   <sql id="freeSort">
+      order by 
+       <if test="freeSort1 != null and freeSort1 != ''">
+           ${freeSort1},
+       </if>
+       <if test="freeSort2 != null and freeSort2 != ''">
+           ${freeSort2},
+       </if>
+       <if test="freeSort3 != null and freeSort3 != ''">
+           ${freeSort3},
+       </if>
+       <if test="freeSort4 != null and freeSort4 != ''">
+           ${freeSort4},
+       </if>
+       <if test="freeSort5 != null and freeSort5 != ''">
+           ${freeSort5},
+       </if>
+       <if test="freeSort6 != null and freeSort6 != ''">
+           ${freeSort6},
+       </if>
+       <if test="freeSort7 != null and freeSort7 != ''">
+           ${freeSort7},
+       </if>
+         free_num
+   </sql>
+
+
+   <sql id="devWhere">
+      <if test="keywordS!=null and keywordS.length()>0">
+         AND
+         ((REGEXP_LIKE(
+               (
+               SELECT sk.skill FROM
+               (SELECT 
+                     x.fno,
+                     LISTAGG(DECODE(skill, 1, 'JAVA/JSP', 2, '.NET', 3, 'PHP', 4, 'ASP', 5, 'ABAP', 6, 'DELPHI', 7, 'PB', 8, 'VC++', 9, '웹디', '기타'), ', ')
+                     WITHIN GROUP(ORDER BY skill) skill
+                  FROM
+                  (
+                     SELECT FREE_NUM fno, skill_category_code as skill FROM FREE_SKILL_CATEGORY UNION
+                     SELECT FREE_NUM, skill_category_code FROM FREE_SKILL_CATEGORY
+                  ) x
+                  GROUP BY fno
+               ) sk
+               WHERE f.free_num = sk.fno
+            ) 
+         , upper('${keywordS}'))
+         OR   
+            upper(f.FNAME) LIKE upper('%${keywordS}%') 
+         OR
+            DECODE(F.gender,1,'남','여') LIKE '%${keywordS}%'
+         OR
+            DECODE(f.highestLevel_edu,1,'고졸',2,'전문대졸',3,'일반대학사졸',4,'일반대석사졸','일반대박사졸') LIKE '%${keywordS}%'
+         OR 
+            f.phone LIKE '%${keywordS}%'
+         OR
+            upper(f.email) LIKE upper('%${keywordS}%'))
+     </if>
+     <if test="(keywordS!=null and keywordS.length()>0) and (keywordE==null or keywordE.length()==0)">
+           )
+     </if>
+     <if test="(keywordS!=null and keywordS.length()>0) and (keywordE!=null and keywordE.length()>0)">
+           ${orand}
+     </if>
+     <if test="(keywordS==null or keywordS=='') and (keywordE!=null and keywordE!='')">
+     	and
+     </if>
+     <if test="keywordE!=null and keywordE.length()>0">
+         (REGEXP_LIKE(
+               (
+               SELECT sk.skill FROM
+               (SELECT 
+                     x.fno,
+                     LISTAGG(DECODE(skill, 1, 'JAVA/JSP', 2, '.NET', 3, 'PHP', 4, 'ASP', 5, 'ABAP', 6, 'DELPHI', 7, 'PB', 8, 'VC++', 9, '웹디', '기타'), ', ')
+                     WITHIN GROUP(ORDER BY skill) skill
+                  FROM
+                  (
+                     SELECT FREE_NUM fno, skill_category_code as skill FROM FREE_SKILL_CATEGORY UNION
+                     SELECT FREE_NUM, skill_category_code FROM FREE_SKILL_CATEGORY
+                  ) x
+                  GROUP BY fno
+               ) sk
+               WHERE f.free_num = sk.fno
+            ) 
+         , upper('${keywordE}'))
+         OR   
+            upper(f.FNAME) LIKE upper('%${keywordE}%') 
+         OR
+            DECODE(F.gender,1,'남','여') LIKE '%${keywordE}%'
+         OR
+            DECODE(f.highestLevel_edu,1,'고졸',2,'전문대졸',3,'일반대학사졸',4,'일반대석사졸','일반대박사졸') LIKE '%${keywordE}%'
+         OR 
+            f.phone LIKE '%${keywordE}%'
+         OR
+            upper(f.email) LIKE upper('%${keywordE}%'))
+     </if>
+     <if test="(keywordS!=null and keywordS.length()>0) and (keywordE!=null and keywordE.length()>0)">
+     	)
+     </if>
+      <if test="job!=null and job.size()>0">
+           <foreach collection="job" item="tmp" open=" AND ( " close=" ) " separator=" or ">
+            job = #{tmp}
+         </foreach>
+         </if>
+         <if test="highestLevel_edu!=null and highestLevel_edu.size()>0">
+            <foreach collection="highestLevel_edu" item="tmp" open=" AND ( " close=" ) " separator=" or ">
+         highestLevel_edu=#{tmp}      
+        </foreach> 
+         </if>
+         <if test="dispatch_role_code!=null and dispatch_role_code.size()>0">
+            <foreach collection="dispatch_role_code" item="tmp" open=" AND ( " close=" ) " separator=" or ">
+         dispatch_role=#{tmp}      
+        </foreach> 
+         </if>
+         <if test="is_black!= null and is_black.size()!=2 and is_black.size()==1 and is_black[0]==1">
+         AND
+         f.FREE_NUM NOT IN (SELECT FREE_NUM FROM IS_BLACK_INFO)  
+      </if>    
+      <if test="is_black!= null and is_black.size()!=2 and is_black.size()==1 and is_black[0]==2">
+         AND
+         f.FREE_NUM IN (SELECT FREE_NUM FROM IS_BLACK_INFO)  
+      </if>   
+      <if test="gender!= null and gender.size()!=2 and gender.size()==1 and gender[0]==1">
+         AND
+          f.GENDER = 1
+      </if>    
+      <if test="gender!= null and gender.size()!=2 and gender.size()==1 and gender[0]==2">
+         AND
+         f.GENDER = 2  
+      </if>   
+      <if test="license_code!=null and license_code.size()>0">
+            <foreach collection="license_code" item="tmp" open=" AND ( " close=" ) " separator=" or ">
+         REGEXP_LIKE((
+               SELECT FLC.license FROM
+               (SELECT 
+                     fno,
+                     LISTAGG(license,  ', ')
+                  WITHIN GROUP(ORDER BY license) license
+                  FROM
+                  (
+                     SELECT FREE_NUM fno, license_code as license FROM FREE_LICENSE FL  UNION
+                     SELECT FREE_NUM, license_code FROM FREE_LICENSE FL
+                  ) x
+                  GROUP BY fno
+               ) FLC
+                  WHERE f.FREE_NUM  = FLC.fno
+            ), '${tmp}') 
+            </foreach>
+         </if>
+         <if test="skill_category_code!=null and skill_category_code.size()>0">
+            <foreach collection="skill_category_code" item="tmp" open=" AND ( " close=" ) " separator=" or ">
+    		<if test="tmp==1">
+	         (
+			    SELECT LISTAGG(skill_category_code, ', ') WITHIN GROUP (ORDER BY skill_category_code) skill
+			    FROM FREE_SKILL_CATEGORY
+			    WHERE FREE_NUM = f.FREE_NUM 
+			      AND skill_category_code <![CDATA[<> 10]]>
+			) LIKE '%${tmp}%'
+			</if>
+			<if test="tmp!=1">
+	         (
+			    SELECT LISTAGG(skill_category_code, ', ') WITHIN GROUP (ORDER BY skill_category_code) skill
+			    FROM FREE_SKILL_CATEGORY
+			    WHERE FREE_NUM = f.FREE_NUM 
+			) LIKE '%${tmp}%'
+			</if>
+         </foreach>
+      </if>  
+    <if test="min_can_dispatch_date!=null and min_can_dispatch_date.length()>0 and max_can_dispatch_date!=null and max_can_dispatch_date.length()>0">
+     AND
+     f.can_dispatch_date BETWEEN TO_DATE(#{min_can_dispatch_date}, 'yyyy-mm-dd') AND TO_DATE(#{max_can_dispatch_date}, 'yyyy-mm-dd')
+     </if>
+    <if test="min_can_dispatch_date!=null and min_can_dispatch_date.length()>0">
+     AND
+     f.can_dispatch_date >= TO_DATE(#{min_can_dispatch_date}, 'yyyy-mm-dd')
+     </if>  
+    <if test="min_dev_year_standard_date!=null and min_dev_year_standard_date.length()>0 and max_dev_year_standard_date!=null and max_dev_year_standard_date.length()>0">
+     AND
+       (select fyi.dev_year_standard_date from free_year_info fyi where f.free_num = fyi.free_num) BETWEEN TO_DATE(#{min_dev_year_standard_date}, 'yyyy-mm-dd') AND TO_DATE(#{max_dev_year_standard_date}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_dev_year_standard_date!=null and min_dev_year_standard_date.length()>0">
+     AND
+       (select fyi.dev_year_standard_date from free_year_info fyi where f.free_num = fyi.free_num) >= TO_DATE(#{min_dev_year_standard_date}, 'yyyy-mm-dd')
+     </if>
+     
+     
+    <if test="min_consultation_time!=null and min_consultation_time.length()>0 and max_consultation_time!=null and max_consultation_time.length()>0">
+     AND
+     f.consultation_time BETWEEN TO_DATE(#{min_consultation_time}, 'yyyy-mm-dd') AND TO_DATE(#{max_consultation_time}, 'yyyy-mm-dd')
+     </if>
+     <if test="min_consultation_time!=null and min_consultation_time.length()>0">
+     AND
+     f.consultation_time >=TO_DATE(#{min_consultation_time}, 'yyyy-mm-dd')
+     </if>
+     
+     <if test="ageS!=null and ageS.length()>0 and ageE!=null and ageE.length()>0">
+      AND
+    TO_NUMBER(TO_CHAR(SYSDATE, 'YYYY')) - f.birth_year + 1 BETWEEN ${ageS} AND ${ageE}
+   </if>
+   <if test="ageS!=null and ageS.length()>0">
+      AND
+    TO_NUMBER(TO_CHAR(SYSDATE, 'YYYY')) - f.birth_year + 1 >= ${ageS}
+   </if>
+   
+
+   <if test="min_graduate_year!=null and min_graduate_year.length()>0 and max_graduate_year!=null and max_graduate_year.length()>0">
+         AND
+     to_number(to_char(f.graduate_date,'yyyy')) BETWEEN ${min_graduate_year} AND ${max_graduate_year}
+   </if>
+   <if test="min_graduate_year!=null and min_graduate_year.length()>0">
+         AND
+     to_number(to_char(f.graduate_date,'yyyy')) >= ${min_graduate_year}
+   </if>
+   
+    <if test="min_imagine_dev_year!=null and min_imagine_dev_year.length()>0 and max_imagine_dev_year!=null and max_imagine_dev_year.length()>0">
+     AND
+       (select fyi.resume_dev_year from free_year_info fyi where f.free_num = fyi.free_num)BETWEEN #{min_imagine_dev_year} AND #{max_imagine_dev_year}
+     </if>
+     <if test="min_imagine_dev_year!=null and min_imagine_dev_year.length()>0">
+     AND
+       (select fyi.resume_dev_year from free_year_info fyi where f.free_num = fyi.free_num)>=#{min_imagine_dev_year}
+     </if>
+      
+      
+   </sql>
+   
+   <insert id="insertFreeInfo" parameterType="com.naver.erp.FreelancerDTO" >
+      insert  into freelancer(
+         free_num
+         ,fName
+         ,gender
+         ,email
+         ,phone
+         ,birth_year
+         ,highestLevel_edu
+         ,graduate_date
+         
+         <if test="consultation_time!=null and consultation_time.length()>0">
+         ,consultation_time
+         </if>
+         
+         ,job
+         ,dispatch_role
+         ,can_dispatch_date
+         <if test="fix_dispatch_date!=null and fix_dispatch_date.length()>0">
+         ,fix_dispatch_date
+         </if>
+         <if test="min_dev_cost!=null and min_dev_cost.length()>0">
+         ,min_dev_cost
+         ,max_dev_cost
+         </if>
+         <if test="how_dev_cost!=null and how_dev_cost.length()>0">
+         ,how_dev_cost
+         </if>
+         <if test="min_operate_cost!=null and min_operate_cost.length()>0">
+         ,min_operate_cost
+         ,max_operate_cost
+         </if>
+         <if test="how_operate_cost!=null and how_operate_cost.length()>0">
+         ,how_operate_cost
+         </if>
+         <if test="have_notebook!=null and have_notebook.length()>0">
+         ,have_notebook
+         </if>
+         ,abode
+         <if test="etc_want!=null and etc_want.length()>0">
+         ,etc_want
+         </if>
+         <if test="wrong_phone!=null and wrong_phone.length()>0">
+         ,wrong_phone
+         </if>
+         <if test="call_notice!=null and call_notice.length()>0">
+         ,call_notice
+         </if>
+         <if test="etc_opinion!=null and etc_opinion.length()>0">
+         ,etc_opinion
+         </if>
+         
+            
+      ) values (
+         (select 'F'||(nvl(max(to_number(substr(free_num,2))),0)+1) from freelancer)
+         ,#{fName}
+         ,#{gender}  
+         ,#{email} 
+         ,#{phone}   
+         ,#{birth_year}
+         ,#{highestLevel_edu}
+         ,to_date(#{graduate_date},'yyyy-mm')
+         <if test="consultation_time!=null and consultation_time.length()>0">
+         ,to_date(substr(#{consultation_time},1,10)||' '||substr(#{consultation_time},12),'yyyy-mm-dd hh24:mi')
+         </if>
+         ,#{job}
+         ,#{dispatch_role_code}
+         ,to_date(#{can_dispatch_date},'yyyy-mm-dd') 
+         <if test="fix_dispatch_date!=null and fix_dispatch_date.length()>0">
+         ,#{fix_dispatch_date}
+         </if>
+         <if test="min_dev_cost!=null and min_dev_cost.length()>0">
+         ,#{min_dev_cost}
+         ,#{max_dev_cost}
+         <if test="how_dev_cost!=null and how_dev_cost.length()>0">
+         ,#{how_dev_cost}
+         </if>
+         </if>
+         <if test="min_operate_cost!=null and min_operate_cost.length()>0">
+         ,#{min_operate_cost}
+         ,#{max_operate_cost}
+         </if>
+         <if test="how_operate_cost!=null and how_operate_cost.length()>0">
+         ,#{how_operate_cost}
+         </if>
+         <if test="have_notebook!=null and have_notebook.length()>0">
+         ,#{have_notebook}
+         </if>
+         ,#{abode}
+         <if test="etc_want!=null and etc_want.length()>0">
+         ,#{etc_want}
+         </if>
+         <if test="wrong_phone!=null and wrong_phone.length()>0">
+         ,#{wrong_phone}
+         </if>
+         <if test="call_notice!=null and call_notice.length()>0">
+         ,#{call_notice}
+         </if>
+         <if test="etc_opinion!=null and etc_opinion.length()>0">
+         ,#{etc_opinion}
+         </if>
+      )
+   </insert> 
+   
+   <insert id="free_can_work_location_info" parameterType="com.naver.erp.FreelancerDTO" >
+      INSERT INTO free_can_work_location_info (
+           free_num
+           ,location_code
+       )
+      <foreach item="tmp1" collection="free_can_work_location" separator=" UNION ALL ">
+         SELECT(select free_num from freelancer where phone=#{phone} and email=#{email}),
+         #{tmp1} FROM DUAL
+      </foreach>
+   </insert> 
+   
+   <insert id="free_favorite_part_code" parameterType="com.naver.erp.FreelancerDTO" >
+      INSERT INTO free_favorite_part_info (
+           free_num
+           ,favorite_part_code
+       )
+      <foreach item="tmp2" collection="favorite_part_code" separator=" UNION ALL ">
+         SELECT
+            (select free_num from freelancer where phone=#{phone} and email=#{email}),
+            #{tmp2} 
+         FROM DUAL
+      </foreach>
+   </insert> 
+   
+   <insert id="free_license" parameterType="com.naver.erp.FreelancerDTO" >
+      INSERT INTO free_license (
+           free_num
+           ,license_code
+       )
+      <foreach item="tmp3" collection="license_code" separator=" UNION ALL ">
+         SELECT(select free_num from freelancer where phone=#{phone} and email=#{email})
+         ,#{tmp3} FROM DUAL
+      </foreach>
+   </insert> 
+   
+   <insert id="free_skill_category" parameterType="com.naver.erp.FreelancerDTO" >
+      INSERT INTO free_skill_category (
+           free_num
+           ,skill_category_code
+       )
+      <foreach item="tmp4" collection="skill_category_code" separator=" UNION ALL ">
+         SELECT(select free_num from freelancer where phone=#{phone} and email=#{email}),
+         #{tmp4} FROM DUAL
+      </foreach>
+   </insert> 
+   
+   <insert id="free_year_info" parameterType="com.naver.erp.FreelancerDTO" >
+      insert into free_year_info (
+           free_num
+           ,resume_dev_year
+           ,dev_year_standard_date
+      ) values( (select free_num from freelancer where phone=#{phone} and email=#{email})
+         ,#{resume_dev_year}||#{resume_dev_month}
+         ,to_date(#{dev_year_standard_date},'yyyy-mm-dd')
+       )
+   </insert> 
+   
+   <insert id="is_black_info" parameterType="com.naver.erp.FreelancerDTO" >
+      INSERT INTO is_black_info (
+           free_num
+           ,BLACK_REASON_CODE
+       )
+      <foreach item="tmp5" collection="black_reason_name" separator=" UNION ALL ">
+         SELECT(select free_num from freelancer where phone=#{phone} and email=#{email}),
+         #{tmp5} FROM DUAL
+      </foreach>
+   </insert>
+
+   <select id="getFreelancerListCntAll" resultType="int">
+      select count(*) from freelancer
+   </select>
+   <select id="getFreelancerListCnt" parameterType="com.naver.erp.FreelancerSearchDTO" resultType="int">
+      select count(*) from freelancer f
+      where 
+         1=1
+         <include refid="devWhere"/>
+         
+   </select>
+   <select id="getFreelancerList" parameterType="com.naver.erp.FreelancerSearchDTO" resultType="java.util.HashMap">
+	   select * from (   select rownum RNUM, zxcvb.* from (   
+	   SELECT
+	         (
+	           SELECT substr(sk.skill,1,11)||'..' FROM
+	           (SELECT 
+	               x.fno,
+	               LISTAGG(DECODE(skill, 1, 'JAVA/JSP', 2, '.NET', 3, 'PHP', 4, 'ASP', 5, 'ABAP', 6, 'Delphi', 7, 'PB', 8, 'VC++', 9, '웹디', '기타'), ', ')
+	               WITHIN GROUP(ORDER BY skill) skill
+	             FROM
+	             (
+	               SELECT FREE_NUM fno, skill_category_code as skill FROM FREE_SKILL_CATEGORY UNION
+	               SELECT FREE_NUM, skill_category_code FROM FREE_SKILL_CATEGORY
+	             ) x
+	             GROUP BY fno
+	           ) sk
+	           WHERE f.free_num = sk.fno
+	         ) "skill",
+	          to_char(graduate_date, 'yyyy-mm-dd') "graduate_date",
+	          free_num "free_num",
+	         fname "fName",
+	         DECODE(gender,1,'남','여') "gender",
+	         TO_CHAR(sysdate, 'YYYY') - TO_CHAR(birth_year)+1||' 살' "age",
+	         birth_year "birth_year",
+	          etc_opinion "etc_opinion",
+	          consultation_time "consultation_time",
+	          job "job",
+	          min_dev_cost "min_dev_cost",
+	          max_dev_cost "max_dev_cost",
+	          min_operate_cost "min_operate_cost",
+	          max_operate_cost "max_operate_cost",
+	          have_notebook "have_notebook",
+	          etc_want "etc_want",
+	          call_notice "call_notice",
+	         DECODE(highestLevel_edu,1,'고졸',2,'전문대졸',3,'일반대학사졸',4,'일반대석사졸','일반대박사졸') "level_edu",
+	         NVL((SELECT SUBSTR(fy.resume_dev_year, 1,2) FROM FREE_YEAR_INFO fy WHERE f.FREE_NUM = fy.FREE_NUM), '0')||' 년' "yeoncha",
+	         TO_CHAR(CAN_DISPATCH_DATE, 'yyyy"년 "mm"월 "dd"일 "')  "can_dispatch_date",
+	          TO_CHAR(CAN_DISPATCH_DATE, 'yyyy-mm-dd')  "can_dispatch_day",
+	         DECODE(FIX_DISPATCH_DATE, 1, '확정' ,null, '미확정') "fix_dispatch_date",
+	         phone||'' "phone",
+	         substr(email,1,11)||'...' "email",
+	         TO_CHAR(consultation_time, 'yyyy"년 "mm"월') "consultation_date",
+	         TO_CHAR((SELECT FYI2.dev_year_standard_date FROM FREE_YEAR_INFO FYI2 WHERE f.free_num = FYI2.free_num), 'yyyy"년 "mm"월 "dd"일 "') "dev_year_standard_date"
+	         FROM FREELANCER f
+	         where
+	         1=1
+	         <include refid="devWhere"/>
+	          
+	         <include refid="freeSort"/> 
+	         <![CDATA[
+	      ) zxcvb) where RNUM>=#{begin_rowNo} and RNUM<=#{end_rowNo}
+	        ]]>
+   </select>
+
+   <select id="getFreeDetailInfo" parameterType="com.naver.erp.FreelancerSearchDTO" resultType="java.util.HashMap">
+      select
+         to_char(graduate_date, 'yyyy-mm') "graduate_date",
+         free_num "free_num",
+         fname "fName",
+         gender "gender",
+         birth_year "birth_year",
+         etc_opinion "etc_opinion",
+         etc_want "etc_want",
+         TO_char(consultation_time,'yyyy-mm-dd')||'T'||TO_char(consultation_time,'hh24:mi') "consultation_time",
+         job "job",
+         min_dev_cost "min_dev_cost",
+         max_dev_cost "max_dev_cost",
+         min_operate_cost "min_operate_cost",
+         max_operate_cost "max_operate_cost",
+         have_notebook "have_notebook",
+         how_dev_cost "how_dev_cost",
+         how_operate_cost "how_operate_cost",
+         etc_want "etc_want",
+         call_notice "call_notice",
+         email "email", 
+         phone "phone",
+         (
+           SELECT sk.license FROM
+            (SELECT 
+              x.fno,
+              LISTAGG(license, ', ')
+              WITHIN GROUP(ORDER BY license) license
+              FROM
+               (
+                 SELECT FREE_NUM fno, license_code as license FROM FREE_LICENSE UNION
+                 SELECT FREE_NUM, license_code FROM FREE_LICENSE
+               ) x
+               GROUP BY fno
+               ) sk
+              WHERE f.free_num = sk.fno
+            ) "license",
+             (
+               SELECT sk.BLACK_REASON_CODE FROM
+                (SELECT 
+                   x.fno,
+                   LISTAGG(BLACK_REASON_CODE, ',')
+                   WITHIN GROUP(ORDER BY BLACK_REASON_CODE) BLACK_REASON_CODE
+                   FROM
+                     (
+                        SELECT FREE_NUM fno, BLACK_REASON_CODE as BLACK_REASON_CODE FROM IS_BLACK_INFO UNION
+                        SELECT FREE_NUM, BLACK_REASON_CODE FROM IS_BLACK_INFO
+                     ) x
+                     GROUP BY fno
+                     ) sk
+                   WHERE f.free_num = sk.fno
+                ) "is_black",
+         TO_CHAR(can_dispatch_date, 'yyyy-mm-dd') "can_dispatch_date",
+         fix_dispatch_date "fix_dispatch_date",
+         highestLevel_edu "highestLevel_edu",
+         have_notebook "have_notebook",
+         dispatch_role "dispatch_role",
+         abode "abode",
+         NVL((SELECT fy.resume_dev_year FROM FREE_YEAR_INFO fy WHERE f.FREE_NUM = fy.FREE_NUM), '0') "yeoncha",
+         TO_CHAR((SELECT fy.dev_year_standard_date FROM FREE_YEAR_INFO fy WHERE f.FREE_NUM = fy.FREE_NUM), 'yyyy-mm-dd')  "dev_year_standard_date",
+         (
+           SELECT sk.skill FROM
+            (SELECT 
+              x.fno,
+              LISTAGG(skill, ', ')
+              WITHIN GROUP(ORDER BY skill) skill
+              FROM
+               (
+                 SELECT FREE_NUM fno, skill_category_code as skill FROM FREE_SKILL_CATEGORY UNION
+                 SELECT FREE_NUM, skill_category_code FROM FREE_SKILL_CATEGORY
+               ) x
+               GROUP BY fno
+               ) sk
+              WHERE f.free_num = sk.fno
+            ) "skill",
+             (
+              SELECT sk.location FROM
+               (SELECT 
+                  x.fno,
+                  LISTAGG(location, ', ')
+                  WITHIN GROUP(ORDER BY location) location
+                  FROM
+                     (
+                        SELECT FREE_NUM fno, location_code as location FROM free_can_work_location_info UNION
+                        SELECT FREE_NUM, location_code FROM free_can_work_location_info
+                     ) x
+                     GROUP BY fno
+                     ) sk
+              WHERE f.free_num = sk.fno
+            ) "can_work_location",
+             (
+              SELECT sk.favorite_part FROM
+               (SELECT 
+                  x.fno,
+                  LISTAGG(favorite_part, ',')
+                  WITHIN GROUP(ORDER BY favorite_part) favorite_part
+                  FROM
+                     (
+                        SELECT FREE_NUM fno, favorite_part_code as favorite_part FROM free_favorite_part_info UNION
+                        SELECT FREE_NUM, favorite_part_code FROM free_favorite_part_info
+                     ) x
+                     GROUP BY fno
+                     ) sk
+              WHERE f.free_num = sk.fno
+            ) "favorite_part",
+             (SELECT SUBSTR(fy.resume_dev_year, 1,2) FROM FREE_YEAR_INFO fy WHERE f.FREE_NUM = fy.FREE_NUM)  "calc_yeoncha"
+      FROM
+         FREELANCER f
+      where
+         f.free_num='${free_uid}'
+   </select>
+
+   <update id="updateFreeInfo" parameterType="com.naver.erp.FreelancerDTO">
+      update
+         FREELANCER
+      set
+          fName = #{fName}
+         ,gender = #{gender}
+         ,email = #{email}
+         ,phone = #{phone}
+         ,birth_year = #{birth_year}
+         ,highestLevel_edu = #{highestLevel_edu}
+         ,graduate_date = to_date(#{graduate_date},'yyyy-mm')
+         ,job = #{job}
+         ,dispatch_role = #{dispatch_role_code}
+         ,can_dispatch_date = to_date(#{can_dispatch_date},'yyyy-mm-dd')
+         ,abode = #{abode}
+         <if test="min_dev_cost!=null and min_dev_cost.length()>0">
+            ,min_dev_cost = #{min_dev_cost}
+            ,max_dev_cost = #{max_dev_cost}
+         </if>
+         <if test="min_dev_cost.length()==0">
+            ,min_dev_cost = NULL
+            ,max_dev_cost = NULL
+         </if>
+         <if test="how_dev_cost!=null and how_dev_cost.length()>0">
+            ,how_dev_cost = #{how_dev_cost}
+         </if>
+         <if test="min_dev_cost.length()==0">
+            ,how_dev_cost = NULL
+         </if>
+         <if test="min_operate_cost!=null and min_operate_cost.length()>0">
+            ,min_operate_cost = #{min_operate_cost}
+            ,max_operate_cost = #{max_operate_cost}
+         </if>
+         <if test="min_operate_cost.length()==0">
+            ,min_operate_cost = NULL
+            ,max_operate_cost = NULL
+         </if>
+         <if test="how_operate_cost!=null and how_operate_cost.length()>0">
+            ,how_operate_cost = #{how_operate_cost}
+         </if>
+         <if test="min_operate_cost.length()==0">
+            ,how_operate_cost = NULL
+         </if>
+         <if test="fix_dispatch_date!=null and fix_dispatch_date.length()>0">
+            ,fix_dispatch_date = #{fix_dispatch_date} 
+         </if>
+         <if test="have_notebook!=null and have_notebook.length()>0">
+            ,have_notebook = #{have_notebook}
+         </if>
+         <if test="fix_dispatch_date==null">
+            ,fix_dispatch_date = NUll
+         </if>
+         <if test="have_notebook==null">
+            ,have_notebook = NUll
+         </if>
+         <if test="etc_want!=null and etc_want.length()>0">
+            ,etc_want = #{etc_want}
+         </if>
+         <if test="etc_want.length()==0">
+            ,etc_want = NULL
+         </if>
+         <if test="wrong_phone!=null and wrong_phone.length()>0">
+            ,wrong_phone = #{wrong_phone}
+         </if>
+         <if test="wrong_phone==null">
+            ,wrong_phone = NULL
+         </if>
+         <if test="call_notice!=null and call_notice.length()>0 ">
+            ,call_notice = #{call_notice}
+         </if>
+         <if test="call_notice.length()==0">
+            ,call_notice = NULL
+         </if>
+         <if test="etc_opinion!=null and etc_opinion.length()>0">
+            ,etc_opinion = #{etc_opinion}
+         </if>         
+         <if test="etc_opinion.length()==0">
+            ,etc_opinion = NULL
+         </if>         
+         <if test="consultation_time.length()==0">
+            ,consultation_time = NULL
+         </if> 
+         <if test="consultation_time!=null and consultation_time.length()>0">
+            ,consultation_time = to_date(substr(#{consultation_time},1,10)||' '||substr(#{consultation_time},12),'yyyy-mm-dd hh24:mi')
+         </if>
+      where free_num = 'F${del_free_uid}'
+   </update>
+
+   <update id="updateFreeWorkLocation" parameterType="com.naver.erp.FreelancerDTO">
+      update
+         FREE_YEAR_INFO
+      set
+         resume_dev_year=#{resume_dev_month}||#{resume_dev_month}
+         ,dev_year_standard_date=to_date(#{dev_year_standard_date}
+         ,'yyyy-mm-dd')
+         where
+            free_num='F${del_free_uid}'
+   </update>
+
+   <update id="updateFreeYearInfo" parameterType="com.naver.erp.FreelancerDTO">
+      update
+         FREE_YEAR_INFO
+      set
+         resume_dev_year=#{resume_dev_month}||#{resume_dev_month}
+         ,dev_year_standard_date=to_date(#{dev_year_standard_date}
+         ,'yyyy-mm-dd')
+         where
+            free_num='F${del_free_uid}'
+   </update>
+
+   <delete id="deleteFreeInfo" parameterType="com.naver.erp.FreelancerDTO">
+   		delete from freelancer where free_num = 'F${del_free_uid}' 
+   </delete>
+   <delete id="delete_free_favorite_part" parameterType="com.naver.erp.FreelancerDTO"> 
+   		delete from free_favorite_part_info where free_num = 'F${del_free_uid}'
+   </delete>
+   <delete id="delete_free_license" parameterType="com.naver.erp.FreelancerDTO"> 
+   		delete from free_license where free_num = 'F${del_free_uid}' 
+   </delete>
+   <delete id="delete_free_skill_category" parameterType="com.naver.erp.FreelancerDTO"> 
+   		delete from free_skill_category where free_num = 'F${del_free_uid}' 
+   </delete>
+   <delete id="delete_free_year_info" parameterType="com.naver.erp.FreelancerDTO"> 
+   		delete from free_year_info where free_num = 'F${del_free_uid}' 
+   </delete>
+   <delete id="delete_is_black_info" parameterType="com.naver.erp.FreelancerDTO"> 
+   		delete from is_black_info where free_num = 'F${del_free_uid}' 
+   </delete>
+   <delete id="delete_free_can_work_location" parameterType="com.naver.erp.FreelancerDTO"> 
+   		delete from free_can_work_location_info where free_num = 'F${del_free_uid}' 
+   </delete>
+</mapper>

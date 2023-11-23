@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.naver.erp.BoardDAO">
+	<sql id="boardWhere">
+		<if test="(keyword1!=null and keyword1.length()>0)">
+				and (
+		</if>
+		
+		<if test="keyword1!=null and keyword1.length()>0">
+					(
+						upper(subject) like upper('%${keyword1}%')
+						or
+						upper(content) like upper('%${keyword1}%')
+						or
+						upper(writer) like upper('%${keyword1}%')
+					)
+		</if>
+		<if test="(keyword1!=null and keyword1.length()>0) or (keyword2!=null and keyword2.length()>0)">
+				)
+		</if>
+		
+		<if test="date!=null">
+			<foreach collection="date"  item="tmp"  open="and (" close=")"  separator=" or ">
+				to_char(
+					sysdate ${tmp}   
+					,'YYYYMMDD'
+				)=to_char(reg_date,'YYYYMMDD')
+			</foreach>
+		</if>
+		order by b_no desc
+	</sql> 
+	
+	<select id="getBoardListCntAll"  resultType="int">
+		select count(*) from board
+	</select>
+
+	<select id="getBoardListCnt"  parameterType="com.naver.erp.BoardSearchDTO" resultType="int">
+		select count(*) from board 
+		where
+			1=1
+			<include refid="boardWhere"/>
+	</select>
+
+	<select id="getBoardList"  parameterType="com.naver.erp.BoardSearchDTO" resultType="java.util.HashMap">
+		 select * from ( select  rownum RNUM, zxcvb.* from  (
+			select  
+				b_no||''                               as "b_no"
+				,subject                               as "subject"
+				,writer                                as "writer"
+				,readcount||''                         as "readcount"
+				,to_char( reg_date,'YYYY-MM-DD')       as "reg_date"
+			from 
+				board		
+			where
+			1=1
+			<include refid="boardWhere"/>
+		<![CDATA[
+			) zxcvb) where  RNUM  >= #{begin_rowNo}  and RNUM <= #{end_rowNo}
+		]]>
+	</select>
+	
+	<update id="updateReadcount" parameterType="int">
+		update 
+			board
+		set
+			readcount = readcount+1
+		where 
+			b_no=#{b_no}
+	</update>
+	
+	<select id="getBoard" parameterType="int" resultType="com.naver.erp.BoardDTO">
+		select 
+			b_no		  "b_no"
+			,subject 	  "subject"
+			,writer 	  "writer"
+			,reg_date     "reg_date" 
+			,readcount    "readcount"
+			,content 	  "content"
+			,img_name	  "img_name"
+		from 
+			board
+		where
+			b_no=#{b_no}
+	</select>
+	
+	<select  id="getBoardCnt" parameterType="int"  resultType="int">
+		select count(*) from board where b_no=#{b_no} 
+	</select>
+	
+	<update id="updateBoard"  parameterType="com.naver.erp.BoardDTO" >
+		update
+			board
+		set
+			subject  = #{subject}
+			,writer  = #{writer}
+			,content = #{content}
+			<if test = "img_name!=null and img_name.length()>0 and isdel==null">
+				,img_name = #{img_name}
+			</if>
+			<if test = "img_name==null or isdel!=null and isdel.length()>0">
+				,img_name = null
+			</if>
+		where
+			b_no=#{b_no} 
+	</update>
+	
+	<update id="updateBoardEmpty"  parameterType="com.naver.erp.BoardDTO" >
+		update
+			board
+		set
+			subject  = '삭제된 게시물입니다.'
+			,content = '삭제된 게시물입니다.'
+		where
+			b_no=#{b_no} 
+	</update>
+	
+	<delete id="deleteBoard"  parameterType="com.naver.erp.BoardDTO" >
+		delete from board
+		where
+			b_no=#{b_no} 
+	</delete>
+
+	<insert id="insertBoard" parameterType="com.naver.erp.BoardDTO" >
+		insert  into board(
+			b_no
+			,subject
+			,writer
+			,readcount
+			,content
+			,reg_date
+			<if test="img_name!=null and img_name.length()>0">
+			,img_name
+			</if>
+		) values (
+			(select nvl(max(b_no),0)+1 from board)
+			,#{subject}
+			,#{writer}  
+			,0
+			,#{content}
+			,sysdate
+			<if test="img_name!=null and img_name.length()>0">
+			,#{img_name}
+			</if> 
+		)
+	</insert>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
